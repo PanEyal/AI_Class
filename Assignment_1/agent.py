@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Callable, Dict, List
 
 import vertex as v
 import graph as g
@@ -8,7 +8,7 @@ import priority_queue as pq
 import program_variables
 
 
-def generate_sequence(get_edge_weight: Callable, state_wrapper : s.StateWrapper):
+def generate_sequence(get_edge_weight: Callable, state_wrapper: s.StateWrapper) -> List[v.Vertex]:
 	if state_wrapper.parent_wrapper is None:
 		return []
 	edge_weight = get_edge_weight(state_wrapper.parent_wrapper.state.current_vertex, state_wrapper.state.current_vertex)
@@ -21,22 +21,15 @@ def generate_sequence(get_edge_weight: Callable, state_wrapper : s.StateWrapper)
 	return current_sequence
 
 
-def get_g(state_wrapper: s.StateWrapper):
+def get_g(state_wrapper: s.StateWrapper) -> int:
 	return state_wrapper.acc_weight
 
-def goal_test(state):
+def goal_test(state: s.State) -> bool:
 	return state.num_of_vertices_to_save() == 0
-
-def all_agents_terminated(agent_list):
-	for agent in agent_list:
-		if not agent.terminated:
-			return False
-	return True
-
 
 class Agent:
 
-	def __init__(self, starting_vertex: v.Vertex, vertices_saved: dict, vertices_broken: dict, h):
+	def __init__(self, starting_vertex: v.Vertex, vertices_saved: dict, vertices_broken: dict, h: Callable):
 		self.state : s.State = s.State(starting_vertex, vertices_saved, vertices_broken)
 		self.h : Callable = h
 		self.score : int = 0
@@ -46,7 +39,7 @@ class Agent:
 		self.num_of_movements : int = 0
 		self.time_passed : int = 0
 
-	def _search_fringe(self, world : g.Graph, fringe : pq.PriorityQueue, limit):
+	def _search_fringe(self, world: g.Graph, fringe: pq.PriorityQueue, limit: int) -> int:
 		counter = 0
 		state_wrapper_of_self_state = s.StateWrapper(c.copy(self.state), None, 0)
 		fringe.insert(state_wrapper_of_self_state)
@@ -68,16 +61,16 @@ class Agent:
 		self.num_of_expansions += counter
 		return counter
 
-	def _search(self, world, limit):
+	def _search(self, world: g.Graph, limit: int) -> int:
 		pass
 
-	def _expand(self, world : g.Graph, limit : int):
+	def _expand(self, world: g.Graph, limit: int) -> None:
 		expansions_in_search = self._search(world, limit)
 		self.terminated = len(self.act_sequence) == 0
 		print("Searched, output act sequence is: " + v.vertex_list_to_string(self.act_sequence))
 		self.time_passed += program_variables.T * expansions_in_search
 
-	def _act_with_limit(self, world, limit):
+	def _act_with_limit(self, world: g.Graph, limit: int) -> None:
 		print("------ " + type(self).__name__ + " ------")
 		if not self.terminated:
 			self.state.update_vertices_saved()
@@ -104,7 +97,7 @@ class Agent:
 		else:
 			print("TERMINATED\n")
 
-	def _enter_dest_vertex(self, vertex : v.Vertex):
+	def _enter_dest_vertex(self, vertex : v.Vertex) -> None:
 		if vertex.people_to_rescue > 0:
 			print("Saving: " + str(vertex))
 			self.score += vertex.people_to_rescue
@@ -113,7 +106,7 @@ class Agent:
 			print("Breaking: " + str(vertex))
 			vertex.form = v.Form.broken
 
-	def _move(self):
+	def _move(self) -> None:
 		self.num_of_movements += 1
 		print("Current sequence: " + v.vertex_list_to_string(self.act_sequence))
 		next_vertex = self.act_sequence[0]
@@ -135,41 +128,46 @@ class Agent:
 		agent_str += "-------------------------\n"
 		return agent_str
 
+def all_agents_terminated(agent_list: List[Agent]) -> bool:
+	for agent in agent_list:
+		if not agent.terminated:
+			return False
+	return True
 
 class GreedyAgent(Agent):
 
-	def __init__(self, starting_vertex, vertices_saved, vertices_broken, h):
+	def __init__(self, starting_vertex: v.Vertex, vertices_saved: Dict[v.Vertex], vertices_broken: Dict[v.Vertex], h: Callable):
 		super().__init__(starting_vertex, vertices_saved, vertices_broken, h)
 
-	def _search(self, world, limit):
+	def _search(self, world: g.Graph, limit: int) -> int:
 		fringe = pq.PriorityQueue(self.h)
 		return self._search_fringe(world, fringe, limit)
 
-	def act(self, world):
-		return self._act_with_limit(world, program_variables.GREEDY_LIMIT)
+	def act(self, world: g.Graph) -> None:
+		self._act_with_limit(world, program_variables.GREEDY_LIMIT)
 
 
 class AStarAgent(Agent):
 
-	def __int__(self, starting_vertex, vertices_saved, vertices_broken, h):
+	def __init__(self, starting_vertex: v.Vertex, vertices_saved: Dict[v.Vertex], vertices_broken: Dict[v.Vertex], h: Callable):
 		super().__init__(starting_vertex, vertices_saved, vertices_broken, h)
 
-	def _search(self, world, limit):
+	def _search(self, world: g.Graph, limit: int) -> int:
 		fringe = pq.PriorityQueue(lambda x: self.h(x) + get_g(x))
 		return self._search_fringe(world, fringe, limit)
 
-	def act(self, world):
-		return self._act_with_limit(world, program_variables.ASTAR_LIMIT)
+	def act(self, world: g.Graph) -> None:
+		self._act_with_limit(world, program_variables.ASTAR_LIMIT)
 
 
 class RealTimeAStarAgent(Agent):
 
-	def __int__(self, starting_vertex, vertices_saved, vertices_broken, h):
+	def __init__(self, starting_vertex: v.Vertex, vertices_saved: Dict[v.Vertex], vertices_broken: Dict[v.Vertex], h: Callable):
 		super().__init__(starting_vertex, vertices_saved, vertices_broken, h)
 
-	def _search(self, world, limit):
+	def _search(self, world: g.Graph, limit: int) -> int:
 		fringe = pq.PriorityQueue(lambda x: self.h(x) + get_g(x))
 		return self._search_fringe(world, fringe, limit)
 
-	def act(self, world):
-		return self._act_with_limit(world, program_variables.REALTIME_ASTAR_LIMIT)
+	def act(self, world: g.Graph) -> None:
+		self._act_with_limit(world, program_variables.REALTIME_ASTAR_LIMIT)

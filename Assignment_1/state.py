@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Union, List
 
 import vertex as v
 import copy as cp
@@ -19,39 +19,39 @@ class State:
 			s += vertex.id + ": " + ("broken" if broken else "intact") + "\n"
 		return s+"}"
 
-	def save_current_vertex(self):
+	def save_current_vertex(self) -> None:
 		if self.current_vertex in self.vertices_saved:
 			self.vertices_saved[self.current_vertex] = True
 
-	def break_current_vertex_if_brittle(self):
+	def break_current_vertex_if_brittle(self) -> None:
 		if self.current_vertex is self.vertices_broken:
 			self.vertices_broken[self.current_vertex] = True
 
-	def get_unsaved_vertices(self):
+	def get_unsaved_vertices(self) -> List[v.Vertex]:
 		unsaved = []
 		for vertex, saved in self.vertices_saved.items():
 			if not saved:
 				unsaved.append(vertex)
 		return unsaved
 
-	def get_intact_vertices(self):
+	def get_intact_vertices(self) -> List[v.Vertex]:
 		intact = []
 		for vertex, broken in self.vertices_broken.items():
 			if not broken:
 				intact.append(vertex)
 		return intact
 
-	def num_of_vertices_to_save(self):
+	def num_of_vertices_to_save(self) -> int:
 		return len(self.get_unsaved_vertices())
 
-	def update_vertices_saved(self):
+	def update_vertices_saved(self) -> None:
 		for vertex in self.vertices_saved:
 			if vertex.people_to_rescue == 0:
 				self.vertices_saved[vertex] = True
 			else:
 				self.vertices_saved[vertex] = False
 
-	def update_vertices_broken(self):
+	def update_vertices_broken(self) -> None:
 		for vertex in self.vertices_broken:
 			if vertex.form == v.Form.broken:
 				self.vertices_broken[vertex] = True
