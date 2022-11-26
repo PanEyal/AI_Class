@@ -1,22 +1,24 @@
 import sys
+from typing import List, Union, Callable
+
 import state as s
 
 class PriorityQueue(object):
 
-    def __init__(self, f):
-        self.queue : [s.StateWrapper] = []
+    def __init__(self, f: Callable):
+        self.queue : List[s.StateWrapper] = []
         self.f = f
 
     def __str__(self):
         return ' '.join([str(i) for i in self.queue])
 
-    def is_empty(self):
+    def is_empty(self) -> bool:
         return len(self.queue) == 0
 
-    def insert(self, data):
+    def insert(self, data: s.StateWrapper) -> None:
         self.queue.append(data)
 
-    def pop(self):
+    def pop(self) -> Union[s.StateWrapper, None]:
         if self.is_empty():
             return None
         min_elem = self.queue[0]

@@ -1,3 +1,4 @@
+import itertools
 from typing import Callable, Dict, List
 
 import vertex as v
@@ -29,7 +30,7 @@ def goal_test(state: s.State) -> bool:
 
 class Agent:
 
-	def __init__(self, starting_vertex: v.Vertex, vertices_saved: dict, vertices_broken: dict, h: Callable):
+	def __init__(self, starting_vertex: v.Vertex, vertices_saved: dict, vertices_broken: dict, h: Callable, save_people: bool = True):
 		self.state : s.State = s.State(starting_vertex, vertices_saved, vertices_broken)
 		self.h : Callable = h
 		self.score : int = 0
@@ -38,6 +39,7 @@ class Agent:
 		self.num_of_expansions : int = 0
 		self.num_of_movements : int = 0
 		self.time_passed : int = 0
+		self.save_people : bool = save_people
 
 	def _search_fringe(self, world: g.Graph, fringe: pq.PriorityQueue, limit: int) -> int:
 		counter = 0
@@ -70,6 +72,27 @@ class Agent:
 		print("Searched, output act sequence is: " + v.vertex_list_to_string(self.act_sequence))
 		self.time_passed += program_variables.T * expansions_in_search
 
+	def _enter_dest_vertex(self, vertex : v.Vertex) -> None:
+		if vertex.people_to_rescue > 0 and self.save_people:
+			print("Saving: " + str(vertex))
+			self.score += vertex.people_to_rescue
+			vertex.people_to_rescue = 0
+		if vertex.form == v.Form.brittle:
+			print("Breaking: " + str(vertex))
+			vertex.form = v.Form.broken
+
+	def _move(self) -> None:
+		self.num_of_movements += 1
+		print("Current sequence: " + v.vertex_list_to_string(self.act_sequence))
+		next_vertex = self.act_sequence[0]
+		print("Current Vertex: " + str(self.state.current_vertex))
+		print("Moving to: " + str(next_vertex))
+		if next_vertex != self.state.current_vertex:
+			self._enter_dest_vertex(next_vertex)
+		self.state.current_vertex = next_vertex
+		self.time_passed += 1
+		self.act_sequence = self.act_sequence[1:]
+
 	def _act_with_limit(self, world: g.Graph, limit: int) -> None:
 		print("------ " + type(self).__name__ + " ------")
 		if not self.terminated:
@@ -97,27 +120,6 @@ class Agent:
 		else:
 			print("TERMINATED\n")
 
-	def _enter_dest_vertex(self, vertex : v.Vertex) -> None:
-		if vertex.people_to_rescue > 0:
-			print("Saving: " + str(vertex))
-			self.score += vertex.people_to_rescue
-			vertex.people_to_rescue = 0
-		if vertex.form == v.Form.brittle:
-			print("Breaking: " + str(vertex))
-			vertex.form = v.Form.broken
-
-	def _move(self) -> None:
-		self.num_of_movements += 1
-		print("Current sequence: " + v.vertex_list_to_string(self.act_sequence))
-		next_vertex = self.act_sequence[0]
-		print("Current Vertex: " + str(self.state.current_vertex))
-		print("Moving to: " + str(next_vertex))
-		if next_vertex != self.state.current_vertex:
-			self._enter_dest_vertex(next_vertex)
-		self.state.current_vertex = next_vertex
-		self.time_passed += 1
-		self.act_sequence = self.act_sequence[1:]
-
 	def __str__(self):
 		agent_str = "-------------------------\n"
 		agent_str += type(self).__name__ + "\n"
@@ -133,6 +135,68 @@ def all_agents_terminated(agent_list: List[Agent]) -> bool:
 		if not agent.terminated:
 			return False
 	return True
+
+class HumanAgent(Agent):
+
+	def __init__(self, starting_vertex: v.Vertex, vertices_saved: Dict[v.Vertex], vertices_broken: Dict[v.Vertex], h: Callable):
+		super().__init__(starting_vertex, vertices_saved, vertices_broken, h)
+
+	def act(self, world: g.Graph) -> None:
+		print("------ " + type(self).__name__ + " ------")
+		if not self.terminated:
+			if len(self.act_sequence) == 0:
+				print("HumanAgent: you are here: " + str(self.state.current_vertex))
+				neighbors = world.expand(self.state.current_vertex)
+				print("-----------------------world-----------------------")
+				print(world)
+				print("---------------------neighbors---------------------")
+				neighbors = list(itertools.filterfalse(lambda ve: ve.form == v.Form.broken, neighbors))
+				i = -1
+				for i, vertex, weight in enumerate(neighbors):
+					print("option: " + str(i) + ", vertex: " + str(vertex) + ", with weight: " + str(weight))
+				print("option: " + str(i+1) + ", no-op")
+				neighbors.append(("no-op", 1))
+				selection = -1
+				while(selection < 0 or selection > i):
+					selection = input("HumanAgent: pick the desired option NOW: ")
+				self.act_sequence = [self.state.current_vertex for _ in range(neighbors[selection][1] - 1)].append(neighbors[selection][0])
+			elif self.act_sequence[-1].form == v.Form.broken:
+				if self.state.current_vertex.form == v.Form.broken:
+					self.terminated = True
+					print("TERMINATED\n")
+					return
+				print("Destination vertex is broken, traversing back")
+				back_steps = world.get_edge_weight(self.act_sequence[-1], self.state.current_vertex) - 1
+				self.act_sequence = [self.state.current_vertex for _ in range(back_steps)]
+			else:
+				print("HumanAgent: traversing across previous selected edge")
+			self._move()
+		else:
+			print("TERMINATED\n")
+
+class StupidGreedyAgent(Agent):
+
+	def __init__(self, starting_vertex: v.Vertex, vertices_saved: Dict[v.Vertex], vertices_broken: Dict[v.Vertex], h: Callable):
+		super().__init__(starting_vertex, vertices_saved, vertices_broken, h)
+
+	def _search(self, world: g.Graph, limit: int) -> int:
+		fringe = pq.PriorityQueue(self.h)
+		return self._search_fringe(world, fringe, limit)
+
+	def act(self, world: g.Graph) -> None:
+		self._act_with_limit(world, program_variables.GREEDY_LIMIT)
+
+class SaboteurAgent(Agent):
+
+	def __init__(self, starting_vertex: v.Vertex, vertices_saved: Dict[v.Vertex], vertices_broken: Dict[v.Vertex], h: Callable):
+		super().__init__(starting_vertex, vertices_saved, vertices_broken, h, True)
+
+	def _search(self, world: g.Graph, limit: int) -> int:
+		fringe = pq.PriorityQueue(self.h)
+		return self._search_fringe(world, fringe, limit)
+
+	def act(self, world: g.Graph) -> None:
+		self._act_with_limit(world, program_variables.ASTAR_LIMIT)
 
 class GreedyAgent(Agent):
 
