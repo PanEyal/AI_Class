@@ -1,3 +1,5 @@
+from typing import Union
+
 import vertex as v
 import copy as cp
 import graph as g
@@ -18,12 +20,12 @@ class State:
 		return s+"}"
 
 	def save_current_vertex(self):
-		self.vertices_saved[self.current_vertex] = True
+		if self.current_vertex in self.vertices_saved:
+			self.vertices_saved[self.current_vertex] = True
 
-	def break_current_vertex(self):
-		if not self.current_vertex.brittle:
-			raise Exception("Tried to break a non-brittle vertex")
-		self.vertices_broken[self.current_vertex] = True
+	def break_current_vertex_if_brittle(self):
+		if self.current_vertex is self.vertices_broken:
+			self.vertices_broken[self.current_vertex] = True
 
 	def get_unsaved_vertices(self):
 		unsaved = []
@@ -42,23 +44,27 @@ class State:
 	def num_of_vertices_to_save(self):
 		return len(self.get_unsaved_vertices())
 
-	# def update_vertices_status(self, world: g.Graph):
-	# 	for vertex in world.get_vertices():
-	# 		if vertex.people_to_rescue > 0:
-	# 			self.vertices_saved[vertex] = False
-	# 		else:
-	# 			self.vertices_saved[vertex] = True
-	# 		if vertex.brittle:
-	# 			self.vertices_broken[vertex] = False
-	# 		else:
-	# 			self.vertices_broken[vertex] = True
+	def update_vertices_saved(self):
+		for vertex in self.vertices_saved:
+			if vertex.people_to_rescue == 0:
+				self.vertices_saved[vertex] = True
+			else:
+				self.vertices_saved[vertex] = False
 
+	def update_vertices_broken(self):
+		for vertex in self.vertices_broken:
+			if vertex.form == v.Form.broken:
+				self.vertices_broken[vertex] = True
+			else:
+				self.vertices_broken[vertex] = False
+
+	#
 	# def does_current_vertex_need_saving(self):
 	# 	return not self.vertices_saved[self.current_vertex]
 
 class StateWrapper(object):
 
-	def __init__(self, state: State, parent_wrapper: 'StateWrapper', acc_weight: int):
+	def __init__(self, state: State, parent_wrapper: Union['StateWrapper', None], acc_weight: int):
 		self.state = state
 		self.parent_wrapper = parent_wrapper
 		self.acc_weight = acc_weight
