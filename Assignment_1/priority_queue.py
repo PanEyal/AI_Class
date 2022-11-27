@@ -1,12 +1,14 @@
 import sys
+from queue import PriorityQueue
 from typing import List, Union, Callable
 
 import state as s
 
+
 class PriorityQueue(object):
 
     def __init__(self, f: Callable):
-        self.queue : List[s.StateWrapper] = []
+        self.queue: List[s.StateWrapper] = []
         self.f = f
 
     def __str__(self):
@@ -29,13 +31,9 @@ class PriorityQueue(object):
             elem_value = self.f(elem)
             elem_amount_to_save = elem.state.num_of_vertices_to_save()
 
-            if elem_value < min_value\
-                or (elem_value == min_value
-                    and elem_amount_to_save < min_element_amount_to_save)\
-                or (elem_value == min_value
-                    and elem_amount_to_save == min_element_amount_to_save
-                    and (elem.state.does_current_vertex_need_saving()
-                        and (not min_elem.state.does_current_vertex_need_saving()))):
+            if elem_value < min_value \
+                    or (elem_value == min_value
+                        and elem_amount_to_save < min_element_amount_to_save):
                 min_elem = elem
                 min_value = elem_value
                 min_element_amount_to_save = elem_amount_to_save
