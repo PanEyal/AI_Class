@@ -19,11 +19,11 @@ class Vertex(object):
 
 
 def vertex_list_to_string(vertices_list: List[Vertex]) -> str:
-    s = "[ "
+    s = "["
     for vertex in vertices_list:
-        s += str(vertex) + ", "
+        s += f'V{str(vertex.id)}, '
     last_index_of_comma = s.rfind(",")
     if last_index_of_comma != -1:
-        s = s[:last_index_of_comma] + s[last_index_of_comma + 1:]
+        s = s[:last_index_of_comma]
 
     return s + "]"

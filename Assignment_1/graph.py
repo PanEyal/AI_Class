@@ -4,6 +4,7 @@ from typing import Tuple, List, Dict
 
 import vertex as v
 
+
 class Graph(object):
 
     def __init__(self, graph_dict=None):
@@ -109,11 +110,11 @@ class Graph(object):
         for k in self.graph_dict:
             res += str(k) + ", "
 
-        res = res[:len(res)-2]
+        res = res[:len(res) - 2]
         res += "\nedges: "
         for edge in self.generate_edges():
             res += "(" + str(edge[0].id) + ", " + str(edge[1].id) + ", " + str(edge[2]) + "), "
-        res = res[:len(res)-2]
+        res = res[:len(res) - 2]
         return res
 
     def copy_graph(self):
@@ -177,6 +178,7 @@ class Graph(object):
         for edge in edge_set:
             mst.add_edge(*edge)
         return mst
+
 
 def zip_graph(original_graph: Graph, essential_vertices):
     essential_graph = original_graph.copy_graph()

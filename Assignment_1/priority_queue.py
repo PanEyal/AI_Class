@@ -31,7 +31,11 @@ class PriorityQueue(object):
 
             if elem_value < min_value \
                     or (elem_value == min_value
-                        and elem_amount_to_save < min_element_amount_to_save):
+                        and elem_amount_to_save < min_element_amount_to_save) \
+                    or (elem_value == min_value
+                        and elem_amount_to_save == min_element_amount_to_save
+                        and elem.state.does_current_vertex_need_saving()
+                        and not min_elem.state.does_current_vertex_need_saving()):
                 min_elem = elem
                 min_value = elem_value
                 min_element_amount_to_save = elem_amount_to_save

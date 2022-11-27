@@ -59,7 +59,9 @@ class State:
                 self.vertices_broken[vertex] = False
 
     def does_current_vertex_need_saving(self):
-        return not self.vertices_saved[self.current_vertex]
+        if self.current_vertex in self.vertices_saved:
+            return not self.vertices_saved[self.current_vertex]
+        return False
 
     def is_vertex_broken(self, vertex):
         if vertex in self.vertices_broken:
