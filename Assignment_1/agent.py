@@ -32,7 +32,7 @@ def goal_test(state: s.State) -> bool:
 
 class Agent:
 
-    def __init__(self, starting_vertex: v.Vertex, vertices_saved: dict, vertices_broken: dict, h: Callable,
+    def __init__(self, starting_vertex: v.Vertex, vertices_saved: Dict[v.Vertex, bool], vertices_broken: Dict[v.Vertex, bool], h: Callable,
                  save_people: bool = True):
         self.state: s.State = s.State(starting_vertex, vertices_saved, vertices_broken)
         self.h: Callable = h
@@ -145,7 +145,7 @@ def all_agents_terminated(agent_list: List[Agent]) -> bool:
 
 class HumanAgent(Agent):
 
-    def __init__(self, starting_vertex: v.Vertex, vertices_saved: Dict[v.Vertex], vertices_broken: Dict[v.Vertex],
+    def __init__(self, starting_vertex: v.Vertex, vertices_saved: Dict[v.Vertex, bool], vertices_broken: Dict[v.Vertex, bool],
                  h: Callable):
         super().__init__(starting_vertex, vertices_saved, vertices_broken, h)
 
@@ -186,7 +186,7 @@ class HumanAgent(Agent):
 
 class SaboteurAgent(Agent):
 
-    def __init__(self, starting_vertex: v.Vertex, vertices_saved: Dict[v.Vertex], vertices_broken: Dict[v.Vertex],
+    def __init__(self, starting_vertex: v.Vertex, vertices_saved: Dict[v.Vertex, bool], vertices_broken: Dict[v.Vertex, bool],
                  h: Callable):
         super().__init__(starting_vertex, vertices_saved, vertices_broken, h, True)
 
@@ -200,7 +200,7 @@ class SaboteurAgent(Agent):
 
 class GreedyAgent(Agent):
 
-    def __init__(self, starting_vertex: v.Vertex, vertices_saved: Dict[v.Vertex], vertices_broken: Dict[v.Vertex],
+    def __init__(self, starting_vertex: v.Vertex, vertices_saved: Dict[v.Vertex, bool], vertices_broken: Dict[v.Vertex, bool],
                  h: Callable):
         super().__init__(starting_vertex, vertices_saved, vertices_broken, h)
 
@@ -214,7 +214,7 @@ class GreedyAgent(Agent):
 
 class AStarAgent(Agent):
 
-    def __init__(self, starting_vertex: v.Vertex, vertices_saved: Dict[v.Vertex], vertices_broken: Dict[v.Vertex],
+    def __init__(self, starting_vertex: v.Vertex, vertices_saved: Dict[v.Vertex, bool], vertices_broken: Dict[v.Vertex, bool],
                  h: Callable):
         super().__init__(starting_vertex, vertices_saved, vertices_broken, h)
 
@@ -228,7 +228,7 @@ class AStarAgent(Agent):
 
 class RealTimeAStarAgent(Agent):
 
-    def __init__(self, starting_vertex: v.Vertex, vertices_saved: Dict[v.Vertex], vertices_broken: Dict[v.Vertex],
+    def __init__(self, starting_vertex: v.Vertex, vertices_saved: Dict[v.Vertex, bool], vertices_broken: Dict[v.Vertex, bool],
                  h: Callable):
         super().__init__(starting_vertex, vertices_saved, vertices_broken, h)
 

@@ -51,20 +51,17 @@ def generate_graph(file_name: str):
     return graph
 
 
-def get_vertices_with_positive_num_of_people(world: g.Graph):
-    list_of_positives = []
-    for vertex in world.get_vertices():
-        if vertex.people_to_rescue > 0:
-            list_of_positives.append(vertex)
-    return list_of_positives
+def savable_vertex_list_to_vertices_saved_dict(v_list: List[v.Vertex]):
+    v_dict = dict()
+    for vertex in v_list:
+        v_dict[vertex] = False
+    return v_dict
 
-
-def get_vertices_list_as_vertices_saved_dict(vertices_list: List[v.Vertex]):
-    vertices_saved_dict = dict()
-    for vertex in vertices_list:
-        vertices_saved_dict[vertex] = False
-    return vertices_saved_dict
-
+def Breakable_vertex_list_to_vertices_broken_dict(v_list: List[v.Vertex]):
+    v_dict = dict()
+    for vertex in v_list:
+        v_dict[vertex] = False
+    return v_dict
 
 def mst_heuristic(state_wrapper: s.StateWrapper) -> int:
     global world
@@ -75,32 +72,6 @@ def mst_heuristic(state_wrapper: s.StateWrapper) -> int:
     zipped_graph = g.zip_graph(world, essential_vertices)
     mst_zipped = zipped_graph.MST()
     return mst_zipped.get_sum_weights()
-
-
-# def create_vertices_list_size(n):
-#     v_list = []
-#     for i in range(n):
-#         v = 'v' + str(i + 1)
-#         v_list.append(v)
-#     return v_list
-
-
-# def create_clique_graph_file_size(n):
-#     v_list = create_vertices_list_size(n)
-#     with open('graph.txt', 'w+') as file:
-#         for vertex_name in v_list:
-#             str_to_write = 'V ' + vertex_name + ' ' + '3' + '\n'
-#             file.write(str_to_write)
-#         for vertex_name in v_list:
-#             for other_vertex_name in v_list:
-#                 if vertex_name != other_vertex_name:
-#                     if abs(int(vertex_name[1:]) - int(other_vertex_name[1:])) == 1 or (
-#                             (vertex_name[1:] == "1" and other_vertex_name[1:] == str(n)) or (
-#                             vertex_name[1:] == str(n) and other_vertex_name[1:] == "1")):
-#                         file.write('E ' + vertex_name + ' ' + other_vertex_name + ' 6' + '\n')
-#                     else:
-#                         file.write('E ' + vertex_name + ' ' + other_vertex_name + ' 1' + '\n')
-
 
 def query_number_from_user(text, limit):
     inserted_valid_value = False
@@ -120,22 +91,9 @@ def query_number_from_user(text, limit):
             print('invalid value: ' + inserted_value + '.. should be a number smaller than ' + str(limit))
     return inserted_num
 
-
-# def create_basic_agent(agent_type, starting_vertex, world):
-#     positive_vertices = get_vertices_with_positive_num_of_people(world)
-#     # vertices_saved = get_vertices_list_as_vertices_saved_dict(positive_vertices)
-#     # if agent_type == 1:
-#     #     return a.GreedyAgent(starting_vertex, vertices_saved, mst_heuristic)
-#     # elif agent_type == 2:
-#     #     return a.AStarAgent(starting_vertex, vertices_saved, mst_heuristic)
-#     # elif agent_type == 3:
-#     #     return a.RealTimeAStarAgent(starting_vertex, vertices_saved, mst_heuristic)
-
 def create_agent(agent_type: int, starting_vertex: v.Vertex, world: g.Graph):
-    need_rescue_vertices = get_need_rescue_vertices(world)
-    brittle_vertices = get_brittle_vertices(world)
-    vertices_saved = get_vertices_list_as_vertices_saved_dict(need_rescue_vertices)
-    vertices_broken = get_vertices_list_as_vertices_broken_dict(brittle_vertices)
+    vertices_saved = savable_vertex_list_to_vertices_saved_dict(world.get_savable_vertices())
+    vertices_broken = Breakable_vertex_list_to_vertices_broken_dict(world.get_brittle_vertices())
     if agent_type == 1:
         return a.GreedyAgent(starting_vertex, vertices_saved, vertices_broken, mst_heuristic)
     elif agent_type == 2:

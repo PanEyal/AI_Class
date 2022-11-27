@@ -1,22 +1,24 @@
 import itertools
 import sys
-from typing import Tuple, List, Callable, Dict
+from typing import Tuple, List, Dict
 
 import vertex as v
-# import sys
-# from queue import PriorityQueue
-# import copy
-
 
 class Graph(object):
 
     def __init__(self, graph_dict=None):
         if graph_dict is None:
             graph_dict = {}
-        self.graph_dict = graph_dict
+        self.graph_dict: Dict[v.Vertex, (v.Vertex, v.Vertex, int)] = graph_dict
 
     def get_vertices(self) -> List[v.Vertex]:
         return list(self.graph_dict.keys())
+
+    def get_savable_vertices(self) -> List[v.Vertex]:
+        return list(filter(lambda ve: ve.people_to_rescue > 0, self.graph_dict.keys()))
+
+    def get_brittle_vertices(self) -> List[v.Vertex]:
+        return list(filter(lambda ve: ve.form == v.Form.brittle, self.graph_dict.keys()))
 
     def get_edges(self):
         return self.generate_edges()
@@ -176,7 +178,6 @@ class Graph(object):
             mst.add_edge(*edge)
         return mst
 
-
 def zip_graph(original_graph: Graph, essential_vertices):
     essential_graph = original_graph.copy_graph()
     for vertex in essential_graph.get_vertices():
@@ -184,6 +185,5 @@ def zip_graph(original_graph: Graph, essential_vertices):
             essential_graph.connect_all_neighbors(vertex)
     essential_graph.remove_unessential_vertices(
         list(filter(lambda u: u not in essential_vertices, essential_graph.get_vertices())))
-    essential_graph.remove_unessential_vertices()
     essential_graph.zip_edges()
     return essential_graph

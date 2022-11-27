@@ -15,7 +15,7 @@ class Vertex(object):
         self.form = form
 
     def __str__(self):
-        return "[V:" + str(self.id) + ", P:" + str(self.people_to_rescue) + ", F:" + str(self.form) + "]"
+        return "[V:" + str(self.id) + ", P:" + str(self.people_to_rescue) + ", F:" + str(self.form.name) + "]"
 
 
 def vertex_list_to_string(vertices_list: List[Vertex]) -> str:
