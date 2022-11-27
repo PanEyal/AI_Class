@@ -65,28 +65,8 @@ def Breakable_vertex_list_to_vertices_broken_dict(v_list: List[v.Vertex]):
     return v_dict
 
 
-def validate_back_traversing(state_wrapper: s.StateWrapper) -> bool:
-    current_vertex = state_wrapper.state.current_vertex
-
-    parent_wrapper = state_wrapper.parent_wrapper
-    if parent_wrapper is None:
-        return True
-    parent_unsaved_vertices = parent_wrapper.state.get_unsaved_vertices()
-
-    grand_parent_wrapper = parent_wrapper.parent_wrapper
-    if grand_parent_wrapper is None:
-        return True
-    grand_parent_vertex = grand_parent_wrapper.state.current_vertex
-    grand_parent_unsaved_vertices = grand_parent_wrapper.state.get_unsaved_vertices()
-
-    # make sure that either this is not a back traversal or it was necessary for saving people
-    return current_vertex != grand_parent_vertex or parent_unsaved_vertices != grand_parent_unsaved_vertices
-
-
 def mst_heuristic(state_wrapper: s.StateWrapper, world: g.Graph) -> int:
     unsaved_vertices = state_wrapper.state.get_unsaved_vertices()
-    if not validate_back_traversing(state_wrapper):
-        return sys.maxsize
     essential_vertices = unsaved_vertices
     if state_wrapper.state.current_vertex not in essential_vertices:
         essential_vertices.append(state_wrapper.state.current_vertex)

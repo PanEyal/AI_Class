@@ -28,6 +28,24 @@ def goal_test(state: s.State) -> bool:
     return state.num_of_vertices_to_save() == 0
 
 
+def validate_back_traversing(state_wrapper: s.StateWrapper) -> bool:
+    current_vertex = state_wrapper.state.current_vertex
+
+    parent_wrapper = state_wrapper.parent_wrapper
+    if parent_wrapper is None:
+        return True
+    parent_unsaved_vertices = parent_wrapper.state.get_unsaved_vertices()
+
+    grand_parent_wrapper = parent_wrapper.parent_wrapper
+    if grand_parent_wrapper is None:
+        return True
+    grand_parent_vertex = grand_parent_wrapper.state.current_vertex
+    grand_parent_unsaved_vertices = grand_parent_wrapper.state.get_unsaved_vertices()
+
+    # make sure that either this is not a back traversal or it was necessary for saving people
+    return current_vertex != grand_parent_vertex or parent_unsaved_vertices != grand_parent_unsaved_vertices
+
+
 class Agent:
 
     def __init__(self, starting_vertex: v.Vertex, vertices_saved: Dict[v.Vertex, bool],
@@ -64,7 +82,8 @@ class Agent:
                                              c.copy(current_state_wrapper.state.vertices_broken))
                     neighbor_state_wrapper = s.StateWrapper(neighbor_state, current_state_wrapper,
                                                             acc_weight + edge_weight)
-                    fringe.insert(neighbor_state_wrapper)
+                    if validate_back_traversing(neighbor_state_wrapper):
+                        fringe.insert(neighbor_state_wrapper)
         self.num_of_expansions += counter
         return counter
 
