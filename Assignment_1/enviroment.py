@@ -4,21 +4,9 @@ import graph as g
 import vertex as v
 import agent as a
 import state as s
-from saboteur import Saboteur
 import program_variables
 
-
-# def generate_time_limit(file_name):
-#     file = open(file_name)
-#     lines = file.readlines()
-#     line = lines[0]
-#     line = line.split(' ')
-#     time = int(line[1])
-#     file.close()
-#     return time
-
-
-# world = None
+world = None
 
 
 def generate_graph(file_name: str):
@@ -26,16 +14,16 @@ def generate_graph(file_name: str):
     file = open(file_name)
     lines = file.readlines()
     vertices = {}
-    
+
     for line in lines:
         line = (line.partition(';'))[0].split(' ')
         if len(line[0]) <= 1:
             continue
         object_type = line[0][1]
-        
+
         if object_type == 'N':
-            pass # what is it good for?
-            
+            pass  # what is it good for?
+
         elif object_type == 'V':
             id = int(line[0][2])
             people_to_rescue = 0
@@ -47,18 +35,18 @@ def generate_graph(file_name: str):
                     people_to_rescue = int(property[1])
                 elif property[0] == 'B':
                     brittle = True
-            
+
             u = v.Vertex(id, people_to_rescue, v.Form.brittle if brittle else v.Form.stable)
             vertices[u.id] = u
             graph.add_vertex(u)
-        
+
         elif object_type == 'E':
             id = int(line[0][2])
             v1 = vertices[int(line[1])]
             v2 = vertices[int(line[2])]
             edge_weight = int(line[3][1:])
             graph.add_edge(v1, v2, edge_weight)
-    
+
     file.close()
     return graph
 
@@ -66,7 +54,7 @@ def generate_graph(file_name: str):
 def get_vertices_with_positive_num_of_people(world: g.Graph):
     list_of_positives = []
     for vertex in world.get_vertices():
-        if vertex.num_of_people > 0:
+        if vertex.people_to_rescue > 0:
             list_of_positives.append(vertex)
     return list_of_positives
 
@@ -114,33 +102,34 @@ def mst_heuristic(state_wrapper: s.StateWrapper) -> int:
 #                         file.write('E ' + vertex_name + ' ' + other_vertex_name + ' 1' + '\n')
 
 
-# def query_number_from_user(text, limit):
-#     inserted_valid_value = False
-#     inserted_num = 0
-#     inserted_value = None
-#     while not inserted_valid_value:
-#         inserted_value = input(text)
-#         if inserted_value == 'exit':
-#             exit(0)
-#         try:
-#             inserted_num = int(inserted_value)
-#             if limit > inserted_num > 0:
-#                 inserted_valid_value = True
-#             else:
-#                 print('invalid value: ' + inserted_value + '.. should be a number smaller than ' + str(limit))
-#         except ValueError:
-#             print('invalid value: ' + inserted_value + '.. should be a number smaller than ' + str(limit))
-#     return inserted_num
+def query_number_from_user(text, limit):
+    inserted_valid_value = False
+    inserted_num = 0
+    inserted_value = None
+    while not inserted_valid_value:
+        inserted_value = input(text)
+        if inserted_value == 'exit':
+            exit(0)
+        try:
+            inserted_num = int(inserted_value)
+            if limit > inserted_num > 0:
+                inserted_valid_value = True
+            else:
+                print('invalid value: ' + inserted_value + '.. should be a number smaller than ' + str(limit))
+        except ValueError:
+            print('invalid value: ' + inserted_value + '.. should be a number smaller than ' + str(limit))
+    return inserted_num
 
-def create_basic_agent(agent_type, starting_vertex, world):
-    positive_vertices = get_vertices_with_positive_num_of_people(world)
-    # vertices_saved = get_vertices_list_as_vertices_saved_dict(positive_vertices)
-    # if agent_type == 1:
-    #     return a.GreedyAgent(starting_vertex, vertices_saved, mst_heuristic)
-    # elif agent_type == 2:
-    #     return a.AStarAgent(starting_vertex, vertices_saved, mst_heuristic)
-    # elif agent_type == 3:
-    #     return a.RealTimeAStarAgent(starting_vertex, vertices_saved, mst_heuristic)
+
+# def create_basic_agent(agent_type, starting_vertex, world):
+#     positive_vertices = get_vertices_with_positive_num_of_people(world)
+#     # vertices_saved = get_vertices_list_as_vertices_saved_dict(positive_vertices)
+#     # if agent_type == 1:
+#     #     return a.GreedyAgent(starting_vertex, vertices_saved, mst_heuristic)
+#     # elif agent_type == 2:
+#     #     return a.AStarAgent(starting_vertex, vertices_saved, mst_heuristic)
+#     # elif agent_type == 3:
+#     #     return a.RealTimeAStarAgent(starting_vertex, vertices_saved, mst_heuristic)
 
 def create_agent(agent_type: int, starting_vertex: v.Vertex, world: g.Graph):
     need_rescue_vertices = get_need_rescue_vertices(world)
@@ -158,7 +147,7 @@ def create_agent(agent_type: int, starting_vertex: v.Vertex, world: g.Graph):
 if __name__ == "__main__":
     print('----Welcome to Hurricane Evacuation Problem----')
     world = generate_graph("input.txt")
-    
+
     agent_list = []
     num_of_agents = query_number_from_user('Please enter the number of desired agents: ', 1000)
 
@@ -168,19 +157,19 @@ if __name__ == "__main__":
         print('a* press 2')
         print('for a* real time press 3')
         agent_type = query_number_from_user('', 4)
-        vertices_names = world.vertices_names()
+        vertices_ids = world.vertices_ids()
         print('Please enter starting vertex number: ')
         picked_valid_vertex = False
         starting_vertex = None
-        while not picked_valid_vertex:
-            for j in range(1, len(vertices_names) + 1):
-                print(str(j) + ') ' + vertices_names[j - 1])
+        while True:
+            for j in range(1, len(vertices_ids) + 1):
+                print(str(j) + ') ' + str(vertices_ids[j - 1]))
             starting_vertex_index = query_number_from_user('insert vertex number and press Enter ',
-                                                           len(vertices_names) + 1)
+                                                           len(vertices_ids) + 1)
             starting_vertex_index -= 1
-            starting_vertex = world.get_vertex(vertices_names[starting_vertex_index])
+            starting_vertex = world.get_vertex(vertices_ids[starting_vertex_index])
             if starting_vertex is not None:
-                picked_valid_vertex = True
+                break
             else:
                 print('Please pick a valid vertex')
         new_agent = create_agent(agent_type, starting_vertex, world)

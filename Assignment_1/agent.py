@@ -184,20 +184,6 @@ class HumanAgent(Agent):
             print("TERMINATED\n")
 
 
-class StupidGreedyAgent(Agent):
-
-    def __init__(self, starting_vertex: v.Vertex, vertices_saved: Dict[v.Vertex], vertices_broken: Dict[v.Vertex],
-                 h: Callable):
-        super().__init__(starting_vertex, vertices_saved, vertices_broken, h)
-
-    def _search(self, world: g.Graph, limit: int) -> int:
-        fringe = pq.PriorityQueue(self.h)
-        return self._search_fringe(world, fringe, limit)
-
-    def act(self, world: g.Graph) -> None:
-        self._act_with_limit(world, program_variables.GREEDY_LIMIT)
-
-
 class SaboteurAgent(Agent):
 
     def __init__(self, starting_vertex: v.Vertex, vertices_saved: Dict[v.Vertex], vertices_broken: Dict[v.Vertex],

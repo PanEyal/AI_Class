@@ -21,12 +21,12 @@ class Graph(object):
     def get_edges(self):
         return self.generate_edges()
 
-    # def get_vertex(self, id):
-    #     vertex_to_ret = None
-    #     for vertex in self.get_vertices():
-    #         if vertex.id == id:
-    #             vertex_to_ret = vertex
-    #     return vertex_to_ret
+    def get_vertex(self, id):
+        vertex_to_ret = None
+        for vertex in self.get_vertices():
+            if vertex.id == id:
+                vertex_to_ret = vertex
+        return vertex_to_ret
 
     def vertices_ids(self) -> List[int]:
         id_list = []
@@ -45,15 +45,6 @@ class Graph(object):
         for neighbor in neighbors:
             if neighbor[0].id == vertex2.id:
                 return neighbor[1]
-
-    # def get_closest_neighbor(self, vertex):
-    #     min_weight = sys.maxsize
-    #     min_neighbor_tup = None
-    #     for neighbor_tup in self.expand(vertex):
-    #         if min_weight >= neighbor_tup[1]:
-    #             min_weight = neighbor_tup[1]
-    #             min_neighbor_tup = neighbor_tup
-    #     return min_neighbor_tup
 
     def is_vertex_exists(self, vertex: v.Vertex) -> bool:
         return vertex.id in self.vertices_ids()
