@@ -1,13 +1,10 @@
-import fnmatch
-import os
-import sys
+import yaml
 from typing import List
 
 import agent as a
 import graph as g
 import state as s
 import vertex as v
-
 
 def generate_graph(file_name: str):
     graph = g.Graph()
@@ -75,24 +72,6 @@ def mst_heuristic(state_wrapper: s.StateWrapper, world: g.Graph) -> int:
     return mst_zipped.get_sum_weights()
 
 
-def query_number_from_user(text, limit):
-    inserted_valid_value = False
-    inserted_num = 0
-    while not inserted_valid_value:
-        inserted_value = input(text)
-        if inserted_value == 'exit':
-            exit(0)
-        try:
-            inserted_num = int(inserted_value)
-            if limit > inserted_num > 0:
-                inserted_valid_value = True
-            else:
-                print(f'invalid value: {inserted_value}. should be a number between 0 and {str(limit)}')
-        except ValueError:
-            print(f'invalid value: {inserted_value}. should be a number between 0 and {str(limit)}')
-    return inserted_num
-
-
 def create_agent(agent_type: int, starting_vertex: v.Vertex, world: g.Graph, expansion_limit: int, time_limit: int,
                  T: float):
     vertices_saved = savable_vertex_list_to_vertices_saved_dict(world.get_savable_vertices())
@@ -109,55 +88,36 @@ def create_agent(agent_type: int, starting_vertex: v.Vertex, world: g.Graph, exp
 
 
 def main():
-    T = 0.01
-    GREEDY_LIMIT = 1
-    ASTAR_LIMIT = 10000
-    REALTIME_ASTAR_LIMIT = 10
-    expansion_limits = [GREEDY_LIMIT, ASTAR_LIMIT, REALTIME_ASTAR_LIMIT]
-
     print('----Welcome to Hurricane Evacuation Problem----')
 
-    dir_path = r'Inputs/'
-    num_of_inputs = len(fnmatch.filter(os.listdir(dir_path), '*.txt')) + 1
+    print('loading config.yaml file...')
+    with open("Inputs/config.yaml", "r") as f:
+        config =  yaml.safe_load(f)
 
-    input_num = query_number_from_user('Please enter the number of the input file: ', num_of_inputs)
-    world = generate_graph(f"Inputs/input{input_num}.txt")
+    world = generate_graph(config['RUN']['INPUT_PATH'])
+    vertices_ids = world.vertices_ids()
 
-    agent_list = []
-    agents_num = query_number_from_user('Please enter the number of desired agents: ', 1000)
-
-    time_limit = query_number_from_user('Enter program time limit: ', 10001)
-
-    for i in range(1, agents_num + 1):
-        print('Please enter the desired type for agent number ' + str(i) + ':')
-        print('for greedy press 1')
-        print('a* press 2')
-        print('for a* real time press 3')
-        agent_type = query_number_from_user('', 4)
-        vertices_ids = world.vertices_ids()
-        print('Please enter starting vertex number: ')
-        while True:
-            for j in range(1, len(vertices_ids) + 1):
-                print(str(j) + ') ' + str(vertices_ids[j - 1]))
-            starting_vertex_index = query_number_from_user('insert vertex number and press Enter ',
-                                                           len(vertices_ids) + 1)
-            starting_vertex_index -= 1
-            starting_vertex = world.get_vertex(vertices_ids[starting_vertex_index])
-            if starting_vertex is not None:
-                break
-            else:
-                print('Please pick a valid vertex')
-        new_agent = create_agent(agent_type, starting_vertex, world, expansion_limits[agent_type - 1], time_limit, T)
-        agent_list.append(new_agent)
+    agents = []
+    agents_locs_name = []
+    for agent_name, starting_vertex_index in config['RUN']['AGENTS']:
+        starting_vertex = world.get_vertex(vertices_ids[starting_vertex_index - 1])
+        new_agent = create_agent(config[agent_name]['ID'], starting_vertex, world, config[agent_name]['TIME_LIMIT'], config['WORLD']['TIME_LIMIT'], config['WORLD']['T'])
+        agents.append(new_agent)
+        agents_locs_name.append((agent_name, starting_vertex_index))
+    print('agents: ')
+    print(agents_locs_name)
     print('world: ')
     print(world)
     input('Press Enter to start..')
 
-    while not a.all_agents_terminated(agent_list):
-        for agent in agent_list:
+    while not a.all_agents_terminated(agents):
+        for agent_idx, agent in enumerate(agents):
+            print(f'\nAGENT {agent_idx+1}): {str(agents_locs_name[agent_idx][0])}')
             agent.act(world)
 
-    for agent in agent_list:
+    print("\n\n\nAGENTS SCORES: ")
+    for agent_idx, agent in enumerate(agents):
+        print(f'\n#### AGENT {agent_idx + 1}): {str(agents_locs_name[agent_idx][0])} ####')
         print(agent)
 
     print("World at End: ")
