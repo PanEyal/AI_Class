@@ -12,9 +12,8 @@ def generate_sequence(get_edge_weight: Callable, state_wrapper: s.StateWrapper) 
         return []
     edge_weight = get_edge_weight(state_wrapper.parent_wrapper.state.current_vertex, state_wrapper.state.current_vertex)
     current_move = []
-    for i in range(edge_weight - 1):
-        current_move.append(state_wrapper.parent_wrapper.state.current_vertex)
-    current_move.append(state_wrapper.state.current_vertex)
+    for i in range(edge_weight):
+        current_move.append(state_wrapper.state.current_vertex)
     current_sequence = generate_sequence(get_edge_weight, state_wrapper.parent_wrapper)
     current_sequence.extend(current_move)
     return current_sequence
@@ -22,10 +21,6 @@ def generate_sequence(get_edge_weight: Callable, state_wrapper: s.StateWrapper) 
 
 def get_g(state_wrapper: s.StateWrapper) -> int:
     return state_wrapper.acc_weight
-
-
-def goal_test(state: s.State) -> bool:
-    return state.num_of_vertices_to_save() == 0
 
 
 def validate_back_traversing(state_wrapper: s.StateWrapper) -> bool:
@@ -72,7 +67,7 @@ class Agent:
             acc_weight = current_state_wrapper.acc_weight
             current_state_wrapper.state.save_current_vertex()
             current_state_wrapper.state.break_current_vertex_if_brittle()
-            if counter == self.expansion_limit or goal_test(current_state_wrapper.state):
+            if counter == self.expansion_limit or current_state_wrapper.state.goal_test():
                 self.act_sequence = generate_sequence(world.get_edge_weight, current_state_wrapper)
                 break
             counter += 1
@@ -105,16 +100,24 @@ class Agent:
             vertex.form = v.Form.broken
 
     def _move(self) -> None:
-        print("Current Vertex: " + str(self.state.current_vertex))
+        print("Current vertex: " + str(self.state.current_vertex))
         print("Current sequence: " + v.vertex_list_to_string(self.act_sequence))
         self.num_of_movements += 1
         next_vertex = self.act_sequence[0]
         print("Moving to: " + str(next_vertex))
         if next_vertex != self.state.current_vertex:
-            self._enter_dest_vertex(next_vertex)
+            self._enter_dest_vertex(self.state.current_vertex)
         self.state.current_vertex = next_vertex
         self.time_passed += 1
         self.act_sequence = self.act_sequence[1:]
+        if len(self.act_sequence) == 0:
+            self._enter_dest_vertex(self.state.current_vertex)
+
+    def _no_op(self) -> None:
+        print("Current vertex: " + str(self.state.current_vertex))
+        print("Current sequence: " + v.vertex_list_to_string(self.act_sequence))
+        print("No-Op: Staying in current vertex")
+        self.time_passed += 1
 
     def act(self, world: g.Graph) -> None:
         if not self.terminated:
@@ -126,16 +129,9 @@ class Agent:
             if not self.terminated and self.time_passed + 1 < self.time_limit:
                 next_vertex = self.act_sequence[0]
                 if next_vertex != self.state.current_vertex and next_vertex.form == v.Form.broken:
-                    if self.state.current_vertex.form == v.Form.broken:
-                        self.terminated = True
-                        print("TERMINATED\n")
-                        return
-                    print("Destination vertex is broken, traversing back")
-                    back_steps = world.get_edge_weight(next_vertex, self.state.current_vertex) - 1
-                    if back_steps == 0:
-                        self._expand(world)
-                    else:
-                        self.act_sequence = [self.state.current_vertex for _ in range(back_steps)]
+                    self.act_sequence = []
+                    self._no_op()
+                    return
                 self._move()
             else:
                 self.terminated = True
@@ -144,10 +140,11 @@ class Agent:
             print("TERMINATED")
 
     def __str__(self):
-        agent_str = "Score: " + str(self.score) + "\n"
-        agent_str += "Number of expansions: " + str(self.num_of_expansions) + "\n"
-        agent_str += "Number of movements: " + str(self.num_of_movements) + "\n"
-        agent_str += "Total time passed: " + str(self.time_passed) + "\n"
+        agent_str = f"Score: {str(self.score)}\n"
+        agent_str += f"Number of expansions: {str(self.num_of_expansions)}\n"
+        agent_str += f"Number of movements: {(self.num_of_movements)}\n"
+        agent_str += f"Total time passed: {str(self.time_passed)}\n"
+        agent_str += f"Agent reached goal!!! \U0001f60e\n" if self.state.goal_test() else "Goal wasn't reached \U0001f61f"
         return agent_str
 
 

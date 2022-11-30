@@ -44,12 +44,8 @@ class State:
     def num_of_vertices_to_save(self) -> int:
         return len(self.get_unsaved_vertices())
 
-    def update_vertices_saved(self) -> None:
-        for vertex in self.vertices_saved:
-            if vertex.people_to_rescue == 0:
-                self.vertices_saved[vertex] = True
-            else:
-                self.vertices_saved[vertex] = False
+    def goal_test(self) -> bool:
+        return self.num_of_vertices_to_save() == 0
 
     def update_vertices_broken(self) -> None:
         for vertex in self.vertices_broken:
@@ -58,11 +54,17 @@ class State:
             else:
                 self.vertices_broken[vertex] = False
 
+    def update_vertices_saved(self) -> None:
+        for vertex in self.vertices_saved:
+            if vertex.people_to_rescue == 0:
+                self.vertices_saved[vertex] = True
+            else:
+                self.vertices_saved[vertex] = False
+
     def does_current_vertex_need_saving(self):
         if self.current_vertex in self.vertices_saved:
             return not self.vertices_saved[self.current_vertex]
         return False
-
     def is_vertex_broken(self, vertex):
         if vertex in self.vertices_broken:
             return self.vertices_broken[vertex]
@@ -75,3 +77,4 @@ class StateWrapper(object):
         self.state = state
         self.parent_wrapper = parent_wrapper
         self.acc_weight = acc_weight
+

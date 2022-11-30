@@ -86,8 +86,7 @@ def create_agent(agent_type: int, starting_vertex: v.Vertex, world: g.Graph, exp
         return a.RealTimeAStarAgent(starting_vertex, vertices_saved, vertices_broken, mst_heuristic, expansion_limit,
                                     time_limit, T)
 
-
-def main():
+def simulator():
     print('----Welcome to Hurricane Evacuation Problem----')
 
     print('loading config.yaml file...')
@@ -124,5 +123,6 @@ def main():
     print(world)
 
 
+
 if __name__ == "__main__":
-    main()
+    simulator()
