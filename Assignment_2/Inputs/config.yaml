@@ -1,0 +1,20 @@
+WORLD:
+  TIME_LIMIT: 10000
+  T: 0.01
+
+GREEDY_AGENT:
+  ID: 1
+  TIME_LIMIT: 1
+
+A_STAR_AGENT:
+  ID: 2
+  TIME_LIMIT: 10000
+
+REAL_TIME_A_STAR_AGENT:
+  ID: 3
+  TIME_LIMIT: 10
+
+RUN:
+  INPUT_PATH: Inputs/input1.txt
+  # [[Agent Type, Starting Vertex]]
+  AGENTS: [[REAL_TIME_A_STAR_AGENT,1]]
