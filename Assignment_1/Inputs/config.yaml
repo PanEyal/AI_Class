@@ -12,9 +12,9 @@ A_STAR_AGENT:
 
 REAL_TIME_A_STAR_AGENT:
   ID: 3
-  TIME_LIMIT: 100
+  TIME_LIMIT: 10
 
 RUN:
-  INPUT_PATH: Inputs/input2.txt
+  INPUT_PATH: Inputs/input1.txt
   # [[Agent Type, Starting Vertex]]
   AGENTS: [[REAL_TIME_A_STAR_AGENT,1]]
