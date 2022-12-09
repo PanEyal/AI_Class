@@ -1,34 +1,40 @@
 import copy as cp
-from typing import Union, List
+from functools import reduce
+from typing import List, Dict
 
+import graph as g
 import vertex as v
 
 
 class State:
 
-    def __init__(self, current_vertex: v.Vertex, vertices_saved: dict, vertices_broken: dict):
-        self.current_vertex = current_vertex
-        self.vertices_saved = cp.copy(vertices_saved)
-        self.vertices_broken = cp.copy(vertices_broken)
-		self.max_agent_score = max_agent_score
-		self.min_agent_score = min_agent_score
-		self.simulated_movements = total_simulated_movements
+    def __init__(self, current_vertices: List[v.Vertex], vertices_saved: Dict[v.Vertex, bool],
+                 vertices_broken: Dict[v.Vertex, bool], remaining_plys: int, agent_scores: List[int] = None):
+        self.current_vertices: List[v.Vertex] = cp.copy(current_vertices)
+        self.vertices_saved: Dict[v.Vertex, bool] = cp.copy(vertices_saved)
+        self.vertices_broken: Dict[v.Vertex, bool] = cp.copy(vertices_broken)
+        self.agent_scores: List[int] = cp.copy(agent_scores) if agent_scores is not None else [0, 0]
+        self.remaining_plys: int = remaining_plys
 
     def __str__(self):
-        s = "Current vertex: " + str(self.current_vertex) + "\n{"
+        s = ''
+        for i, vertex in enumerate(self.current_vertices):
+            s += f'Agent {i}: vertex - {vertex}, score - {self.agent_scores[i]}'
         for vertex, saved in self.vertices_saved.items():
-            s += vertex.id + ": " + ("saved" if saved else "not saved") + "\n"
+            s += f'Vertex {vertex.id}: {"saved" if saved else "not saved"}'
         for vertex, broken in self.vertices_broken.items():
-            s += vertex.id + ": " + ("broken" if broken else "intact") + "\n"
-        return s + "}"
+            s += f'Vertex {vertex.id}: {"broken" if broken else "not broken"}'
+        s += f'Search depth: {self.remaining_plys}'
+        return s + '\n'
 
-    def save_current_vertex(self) -> None:
-        if self.current_vertex in self.vertices_saved:
-            self.vertices_saved[self.current_vertex] = True
+    def save_current_vertex(self, agent_id: int) -> None:
+        if self.current_vertices[agent_id] in self.vertices_saved:
+            self.vertices_saved[self.current_vertices[agent_id]] = True
+            self.agent_scores[agent_id] += self.current_vertices[agent_id].people_to_rescue
 
-    def break_current_vertex_if_brittle(self) -> None:
-        if self.current_vertex in self.vertices_broken:
-            self.vertices_broken[self.current_vertex] = True
+    def break_current_vertex_if_brittle(self, agent_id: int) -> None:
+        if self.current_vertices[agent_id] in self.vertices_broken:
+            self.vertices_broken[self.current_vertices[agent_id]] = True
 
     def get_unsaved_vertices(self) -> List[v.Vertex]:
         unsaved = []
@@ -37,17 +43,10 @@ class State:
                 unsaved.append(vertex)
         return unsaved
 
-    def get_intact_vertices(self) -> List[v.Vertex]:
-        intact = []
-        for vertex, broken in self.vertices_broken.items():
-            if not broken:
-                intact.append(vertex)
-        return intact
-
     def num_of_vertices_to_save(self) -> int:
         return len(self.get_unsaved_vertices())
 
-    def goal_test(self) -> bool:
+    def is_all_saved(self) -> bool:
         return self.num_of_vertices_to_save() == 0
 
     def update_vertices_broken(self) -> None:
@@ -64,20 +63,43 @@ class State:
             else:
                 self.vertices_saved[vertex] = False
 
-    def does_current_vertex_need_saving(self):
-        if self.current_vertex in self.vertices_saved:
-            return not self.vertices_saved[self.current_vertex]
+    def does_current_vertex_need_saving(self, agent_id: int) -> bool:
+        if self.current_vertices[agent_id] in self.vertices_saved:
+            return not self.vertices_saved[self.current_vertices[agent_id]]
         return False
+
     def is_vertex_broken(self, vertex):
         if vertex in self.vertices_broken:
             return self.vertices_broken[vertex]
         return False
 
+    def clone(self):
+        return State(self.current_vertices, self.vertices_saved, self.vertices_broken, self.remaining_plys,
+                     self.agent_scores)
 
-class StateWrapper(object):
+    def no_op(self):
+        return State(self.current_vertices, self.vertices_saved, self.vertices_broken, self.remaining_plys - 1,
+                     self.agent_scores)
 
-    def __init__(self, state: State, parent_wrapper: Union['StateWrapper', None], acc_weight: int):
-        self.state = state
-        self.parent_wrapper = parent_wrapper
-        self.acc_weight = acc_weight
+    def successor(self, agent_id: int, world: g.Graph) -> List["State"]:
+        successors = []
+        for vertex, _ in world.expand(self.current_vertices[agent_id]):
+            if not self.is_vertex_broken(vertex):
+                successor = self.clone()
+                successor.current_vertices[agent_id] = vertex
+                successor.save_current_vertex(agent_id)
+                successor.break_current_vertex_if_brittle(agent_id)
+                successor.remaining_plys -= 1
+                successors.append(successor)
+        successors.append(self.no_op())
+        return successors
 
+    def evaluate(self):
+        return *self.agent_scores, self.remaining_plys
+
+    def evaluate_alpha_beta(self, agent_id: int):
+        return self.agent_scores[agent_id] - self.agent_scores[1 - agent_id]
+
+    def terminal_state(self):
+        return self.remaining_plys == 0 \
+               or self.is_all_saved()

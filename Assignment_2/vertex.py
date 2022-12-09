@@ -1,5 +1,4 @@
 from enum import Enum
-from typing import List
 
 
 class Form(Enum):
@@ -16,14 +15,3 @@ class Vertex(object):
 
     def __str__(self):
         return "[V:" + str(self.id) + ", P:" + str(self.people_to_rescue) + ", F:" + str(self.form.name) + "]"
-
-
-def vertex_list_to_string(vertices_list: List[Vertex]) -> str:
-    s = "["
-    for vertex in vertices_list:
-        s += f'V{str(vertex.id)}, '
-    last_index_of_comma = s.rfind(",")
-    if last_index_of_comma != -1:
-        s = s[:last_index_of_comma]
-
-    return s + "]"

@@ -1,10 +1,11 @@
-import yaml
 from typing import List
+
+import yaml
 
 import agent as a
 import graph as g
-import state as s
 import vertex as v
+
 
 def generate_graph(file_name: str):
     graph = g.Graph()
@@ -62,66 +63,55 @@ def Breakable_vertex_list_to_vertices_broken_dict(v_list: List[v.Vertex]):
     return v_dict
 
 
-def mst_heuristic(state_wrapper: s.StateWrapper, world: g.Graph) -> int:
-    unsaved_vertices = state_wrapper.state.get_unsaved_vertices()
-    essential_vertices = unsaved_vertices
-    if state_wrapper.state.current_vertex not in essential_vertices:
-        essential_vertices.append(state_wrapper.state.current_vertex)
-    zipped_graph = g.zip_graph(world, essential_vertices)
-    mst_zipped = zipped_graph.MST()
-    return mst_zipped.get_sum_weights()
-
-
-def create_agent(agent_type: int, starting_vertex: v.Vertex, world: g.Graph, expansion_limit: int, time_limit: int,
-                 T: float):
+def create_agent(game_type: int, world: g.Graph, starting_vertices: List[v.Vertex], _id: int, ply_limit: int):
     vertices_saved = savable_vertex_list_to_vertices_saved_dict(world.get_savable_vertices())
     vertices_broken = Breakable_vertex_list_to_vertices_broken_dict(world.get_brittle_vertices())
-    if agent_type == 1:
-        return a.GreedyAgent(starting_vertex, vertices_saved, vertices_broken, mst_heuristic, expansion_limit,
-                             time_limit, T)
-    elif agent_type == 2:
-        return a.AStarAgent(starting_vertex, vertices_saved, vertices_broken, mst_heuristic, expansion_limit,
-                            time_limit, T)
-    elif agent_type == 3:
-        return a.RealTimeAStarAgent(starting_vertex, vertices_saved, vertices_broken, mst_heuristic, expansion_limit,
-                                    time_limit, T)
+    if game_type == 'ADVERSARIAL':
+        return a.AdversarialAgent(vertices_saved, vertices_broken, starting_vertices, _id, ply_limit)
+    elif game_type == 'SEMI-COOP':
+        return a.SemiCoopAgent(vertices_saved, vertices_broken, starting_vertices, _id, ply_limit)
+    elif game_type == 'FULLY-COOP':
+        return a.FullyCoopAgent(vertices_saved, vertices_broken, starting_vertices, _id, ply_limit)
+
 
 def simulator():
     print('----Welcome to Hurricane Evacuation Problem----')
 
     print('loading config.yaml file...')
     with open("Inputs/config.yaml", "r") as f:
-        config =  yaml.safe_load(f)
+        config = yaml.safe_load(f)
 
-    world = generate_graph(config['RUN']['INPUT_PATH'])
+    world = generate_graph(config['GAME_SPECS']['INPUT_PATH'])
     vertices_ids = world.vertices_ids()
 
     agents = []
-    agents_locs_name = []
-    for agent_name, starting_vertex_index in config['RUN']['AGENTS']:
-        starting_vertex = world.get_vertex(vertices_ids[starting_vertex_index - 1])
-        new_agent = create_agent(config[agent_name]['ID'], starting_vertex, world, config[agent_name]['TIME_LIMIT'], config['WORLD']['TIME_LIMIT'], config['WORLD']['T'])
-        agents.append(new_agent)
-        agents_locs_name.append((agent_name, starting_vertex_index))
+    agents_names = []
+    starting_vertices = [world.get_vertex(vertices_ids[i - 1]) for i in config['GAME_SPECS']['STARTING_VERTICES']]
+    game_type = config['GAME_SPECS']['TYPE']
+    agents.append(create_agent(game_type, world, starting_vertices, 0, config['GAME_SPECS']['PLY_LIMIT']))
+    agents_names.append('Agent 0')
+    agents.append(create_agent(game_type, world, starting_vertices, 1, config['GAME_SPECS']['PLY_LIMIT']))
+    agents_names.append('Agent 1')
     print('agents: ')
-    print(agents_locs_name)
+    for agent_name, starting_vertex in zip(agents_names, starting_vertices):
+        print(agent_name + ' starting vertex index: ' + str(starting_vertex.id))
     print('world: ')
     print(world)
-    input('Press Enter to start..')
+    print('game type: ' + game_type)
+    input('Press Enter to start...')
 
     while not a.all_agents_terminated(agents):
-        for agent_idx, agent in enumerate(agents):
-            print(f'\nAGENT {agent_idx+1}): {str(agents_locs_name[agent_idx][0])}')
+        for agent in agents:
+            print(f'\nAGENT {agent.id})')
             agent.act(world)
 
     print("\n\n\nAGENTS SCORES: ")
     for agent_idx, agent in enumerate(agents):
-        print(f'\n#### AGENT {agent_idx + 1}): {str(agents_locs_name[agent_idx][0])} ####')
+        print(f'\n#### AGENT {agent_idx + 1}): {str(agents_names[agent_idx])} ####')
         print(agent)
 
     print("World at End: ")
     print(world)
-
 
 
 if __name__ == "__main__":
