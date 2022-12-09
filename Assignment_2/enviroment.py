@@ -5,6 +5,7 @@ import yaml
 import agent as a
 import graph as g
 import vertex as v
+import state as s
 
 
 def generate_graph(file_name: str):
@@ -66,12 +67,14 @@ def Breakable_vertex_list_to_vertices_broken_dict(v_list: List[v.Vertex]):
 def create_agent(game_type: int, world: g.Graph, starting_vertices: List[v.Vertex], _id: int, ply_limit: int):
     vertices_saved = savable_vertex_list_to_vertices_saved_dict(world.get_savable_vertices())
     vertices_broken = Breakable_vertex_list_to_vertices_broken_dict(world.get_brittle_vertices())
+    initial_state = s.State(starting_vertices, vertices_saved, vertices_broken, ply_limit)
+
     if game_type == 'ADVERSARIAL':
-        return a.AdversarialAgent(vertices_saved, vertices_broken, starting_vertices, _id, ply_limit)
+        return a.AdversarialAgent(initial_state, _id)
     elif game_type == 'SEMI-COOP':
-        return a.SemiCoopAgent(vertices_saved, vertices_broken, starting_vertices, _id, ply_limit)
+        return a.SemiCoopAgent(initial_state, _id)
     elif game_type == 'FULLY-COOP':
-        return a.FullyCoopAgent(vertices_saved, vertices_broken, starting_vertices, _id, ply_limit)
+        return a.FullyCoopAgent(initial_state, _id)
 
 
 def simulator():
@@ -99,11 +102,13 @@ def simulator():
     print(world)
     print('game type: ' + game_type)
     input('Press Enter to start...')
-
+    new_state = None
     while not a.all_agents_terminated(agents):
         for agent in agents:
+            if new_state is not None:
+                agent.state = new_state
             print(f'\nAGENT {agent.id})')
-            agent.act(world)
+            new_state = agent.act(world)
 
     print("\n\n\nAGENTS SCORES: ")
     for agent_idx, agent in enumerate(agents):

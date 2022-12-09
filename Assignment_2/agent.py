@@ -1,4 +1,4 @@
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Union
 
 import graph as g
 import state as s
@@ -7,13 +7,11 @@ import vertex as v
 
 class Agent:
 
-    def __init__(self, vertices_broken: Dict[v.Vertex, bool], vertices_saved: Dict[v.Vertex, bool],
-                 starting_vertices: List[v.Vertex], _id: int, ply_limit: int):
+    def __init__(self, initial_state: s.State, _id: int):
 
-        self.state: s.State = s.State(starting_vertices, vertices_saved, vertices_broken, ply_limit)
+        self.state: s.State = initial_state
         self.score: int = 0
         self.terminated: bool = False
-        self.ply_limit: int = ply_limit
         self.id: int = _id
 
     def _enter_dest_vertex(self, vertex: v.Vertex) -> None:
@@ -31,24 +29,27 @@ class Agent:
         self._enter_dest_vertex(next_vertex)
         self.state.current_vertices[self.id] = next_vertex
 
-    def _no_op(self) -> None:
+    def _no_op(self, next_vertex) -> None:
         print("Current vertex: " + str(self.state.current_vertices[self.id]))
-        print("No-Op: Staying in current vertex")
+        print('No-Op: Staying in current vertex - ' + ('FORCED' if next_vertex is None else 'CHOSEN'))
 
-    def act(self, world: g.Graph) -> None:
+    def act(self, world: g.Graph) -> Union[s.State, None]:
+        self.state.update_vertices_saved()
+        self.state.update_vertices_broken()
+
         if self.state.is_all_saved():
             self.terminated = True
         if self.terminated:
             print("TERMINATED")
-            return
+            return None
 
-        self.state.update_vertices_saved()
-        self.state.update_vertices_broken()
         next_vertex = self._search(world)
-        if next_vertex is None:
-            self._no_op()
+        if next_vertex is None or next_vertex == self.state.current_vertices[self.id]:
+            self._no_op(next_vertex)
         else:
             self._move(next_vertex)
+
+        return self.state
 
     def __str__(self):
         agent_str = f"Score: {str(self.score)}\n"
@@ -68,9 +69,8 @@ def all_agents_terminated(agent_list: List[Agent]) -> bool:
 
 
 class AdversarialAgent(Agent):
-    def __init__(self, vertices_saved: Dict[v.Vertex, bool], vertices_broken: Dict[v.Vertex, bool],
-                 starting_vertices: List[v.Vertex], _id: int, ply_limit: int):
-        super().__init__(vertices_saved, vertices_broken, starting_vertices, _id, ply_limit)
+    def __init__(self, initial_state, _id: int):
+        super().__init__(initial_state, _id)
 
     def _search(self, world: g.Graph) -> v.Vertex:
         return self._search_minimax(world)
@@ -112,9 +112,8 @@ class AdversarialAgent(Agent):
 
 
 class MaxAgent(Agent):
-    def __init__(self, vertices_saved: Dict[v.Vertex, bool], vertices_broken: Dict[v.Vertex, bool],
-                 starting_vertices: List[v.Vertex], _id: int, ply_limit: int):
-        super().__init__(vertices_saved, vertices_broken, starting_vertices, _id, ply_limit)
+    def __init__(self, initial_state, _id: int):
+        super().__init__(initial_state, _id)
 
     def _search(self, world: g.Graph) -> v.Vertex:
         return self._search_max(world)
@@ -156,9 +155,8 @@ class MaxAgent(Agent):
 
 
 class SemiCoopAgent(MaxAgent):
-    def __init__(self, vertices_saved: Dict[v.Vertex, bool], vertices_broken: Dict[v.Vertex, bool],
-                 starting_vertices: List[v.Vertex], _id: int, ply_limit: int):
-        super().__init__(vertices_broken, vertices_saved, starting_vertices, _id, ply_limit)
+    def __init__(self, initial_state, _id: int):
+        super().__init__(initial_state, _id)
 
     @staticmethod
     def _comparator(val1: Tuple[int, int, int], val2: Tuple[int, int, int]) -> Tuple[int, int, int]:
@@ -169,9 +167,8 @@ class SemiCoopAgent(MaxAgent):
 
 
 class FullyCoopAgent(MaxAgent):
-    def __init__(self, vertices_saved: Dict[v.Vertex, bool], vertices_broken: Dict[v.Vertex, bool],
-                 starting_vertices: List[v.Vertex], _id: int, ply_limit: int):
-        super().__init__(vertices_broken, vertices_saved, starting_vertices, _id, ply_limit)
+    def __init__(self, initial_state, _id: int):
+        super().__init__(initial_state, _id)
 
     @staticmethod
     def _comparator(val1: Tuple[int, int, int], val2: Tuple[int, int, int]) -> Tuple[int, int, int]:

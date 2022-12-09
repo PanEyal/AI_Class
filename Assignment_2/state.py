@@ -19,11 +19,11 @@ class State:
     def __str__(self):
         s = ''
         for i, vertex in enumerate(self.current_vertices):
-            s += f'Agent {i}: vertex - {vertex}, score - {self.agent_scores[i]}'
+            s += f'Agent {i}: vertex - {vertex}, score - {self.agent_scores[i]} '
         for vertex, saved in self.vertices_saved.items():
-            s += f'Vertex {vertex.id}: {"saved" if saved else "not saved"}'
+            s += f'Vertex {vertex.id}: {"saved" if saved else "not saved"} '
         for vertex, broken in self.vertices_broken.items():
-            s += f'Vertex {vertex.id}: {"broken" if broken else "not broken"}'
+            s += f'Vertex {vertex.id}: {"broken" if broken else "not broken"} '
         s += f'Search depth: {self.remaining_plys}'
         return s + '\n'
 
