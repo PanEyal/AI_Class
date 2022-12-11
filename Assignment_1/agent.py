@@ -162,7 +162,7 @@ class GreedyAgent(Agent):
         super().__init__(starting_vertex, vertices_saved, vertices_broken, h, expansion_limit, time_limit, T)
 
     def _search(self, world: g.Graph) -> int:
-        fringe = pq.PriorityQueue(lambda x: self.h(x, world))
+        fringe = pq.PriorityQueue(lambda x: 2 * self.h(x, world))
         return self._search_fringe(world, fringe)
 
 
@@ -174,7 +174,7 @@ class AStarAgent(Agent):
         super().__init__(starting_vertex, vertices_saved, vertices_broken, h, expansion_limit, time_limit, T)
 
     def _search(self, world: g.Graph) -> int:
-        fringe = pq.PriorityQueue(lambda x: self.h(x, world) + get_g(x))
+        fringe = pq.PriorityQueue(lambda x: 2 * self.h(x, world) + get_g(x))
         return self._search_fringe(world, fringe)
 
 class RealTimeAStarAgent(Agent):
@@ -185,5 +185,5 @@ class RealTimeAStarAgent(Agent):
         super().__init__(starting_vertex, vertices_saved, vertices_broken, h, expansion_limit, time_limit, T)
 
     def _search(self, world: g.Graph) -> int:
-        fringe = pq.PriorityQueue(lambda x: self.h(x, world) + get_g(x))
+        fringe = pq.PriorityQueue(lambda x: 2 * self.h(x, world) + get_g(x))
         return self._search_fringe(world, fringe)

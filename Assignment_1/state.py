@@ -65,6 +65,7 @@ class State:
         if self.current_vertex in self.vertices_saved:
             return not self.vertices_saved[self.current_vertex]
         return False
+
     def is_vertex_broken(self, vertex):
         if vertex in self.vertices_broken:
             return self.vertices_broken[vertex]
