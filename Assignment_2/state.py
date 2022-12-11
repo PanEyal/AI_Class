@@ -1,5 +1,4 @@
 import copy as cp
-from functools import reduce
 from typing import List, Dict
 
 import graph as g
@@ -28,7 +27,8 @@ class State:
         return s + '\n'
 
     def save_current_vertex(self, agent_id: int) -> None:
-        if self.current_vertices[agent_id] in self.vertices_saved:
+        if self.current_vertices[agent_id] in self.vertices_saved \
+                and not self.vertices_saved[self.current_vertices[agent_id]]:
             self.vertices_saved[self.current_vertices[agent_id]] = True
             self.agent_scores[agent_id] += self.current_vertices[agent_id].people_to_rescue
 

@@ -1,4 +1,4 @@
-from typing import Dict, List, Tuple, Union
+from typing import List, Tuple, Union
 
 import graph as g
 import state as s
@@ -13,6 +13,8 @@ class Agent:
         self.score: int = 0
         self.terminated: bool = False
         self.id: int = _id
+
+        self._enter_dest_vertex(initial_state.current_vertices[_id])
 
     def _enter_dest_vertex(self, vertex: v.Vertex) -> None:
         if vertex.people_to_rescue > 0:
@@ -29,27 +31,32 @@ class Agent:
         self._enter_dest_vertex(next_vertex)
         self.state.current_vertices[self.id] = next_vertex
 
-    def _no_op(self, next_vertex) -> None:
+    def _no_op(self) -> None:
         print("Current vertex: " + str(self.state.current_vertices[self.id]))
-        print('No-Op: Staying in current vertex - ' + ('FORCED' if next_vertex is None else 'CHOSEN'))
+        print('No-Op: Staying in current vertex')
 
     def act(self, world: g.Graph) -> Union[s.State, None]:
         self.state.update_vertices_saved()
         self.state.update_vertices_broken()
 
+        next_vertex = None
         if self.state.is_all_saved():
             self.terminated = True
-        if self.terminated:
-            print("TERMINATED")
-            return None
+        else:
+            next_vertex = self._search(world)
 
-        next_vertex = self._search(world)
-        if next_vertex is None or next_vertex == self.state.current_vertices[self.id]:
-            self._no_op(next_vertex)
+        if next_vertex is None:
+            self.terminated = True
+        elif next_vertex == self.state.current_vertices[self.id]:
+            self._no_op()
         else:
             self._move(next_vertex)
 
-        return self.state
+        if self.terminated:
+            print("TERMINATED")
+            return None
+        else:
+            return self.state
 
     def __str__(self):
         agent_str = f"Score: {str(self.score)}\n"
@@ -77,15 +84,15 @@ class AdversarialAgent(Agent):
 
     def _search_minimax(self, world: g.Graph) -> v.Vertex:
         best_vertex = None
-        val = float('inf')
+        val = float('-inf')
         alpha = float('-inf')
         beta = float('inf')
         for next_state in self.state.successor(self.id, world):
             value_of_new_state = self.min_value_alpha_beta(next_state, world, alpha, beta)
-            if val > value_of_new_state:
+            if val < value_of_new_state:
                 val = value_of_new_state
                 best_vertex = next_state.current_vertices[self.id]
-            beta = min(val, beta)
+            alpha = max(val, alpha)
         return best_vertex
 
     def max_value_alpha_beta(self, state: s.State, world: g.Graph, alpha: float, beta: float) -> float:
@@ -126,8 +133,8 @@ class MaxAgent(Agent):
             if best_value is None:
                 best_value = value_of_new_state
                 best_vertex = next_state.current_vertices[self.id]
-            elif not (best_value == self._comparator(self._order_val_tup(best_value, self.id),
-                                                     self._order_val_tup(value_of_new_state, self.id))):
+            elif self._compare_vals(self._order_val_tup(value_of_new_state, self.id),
+                                    self._order_val_tup(best_value, self.id)):
                 best_value = value_of_new_state
                 best_vertex = next_state.current_vertices[self.id]
         return best_vertex
@@ -137,12 +144,14 @@ class MaxAgent(Agent):
             return state.evaluate()
         best_value = None
         for next_state in state.successor(agent_id, world):
+            next_state_vertices = next_state.current_vertices
+            current_vertices = self.state.current_vertices
             curr_value = self.max_value(next_state, 1 - agent_id, world)
             if best_value is None:
                 best_value = curr_value
-
-            best_value = self._comparator(self._order_val_tup(best_value, agent_id),
-                                          self._order_val_tup(curr_value, agent_id))
+            elif self._compare_vals(self._order_val_tup(curr_value, agent_id),
+                                    self._order_val_tup(best_value, agent_id)):
+                best_value = curr_value
         return best_value
 
     @staticmethod
@@ -150,7 +159,7 @@ class MaxAgent(Agent):
         return tup[agent_id], tup[1 - agent_id], tup[2]
 
     @staticmethod
-    def _comparator(val1: Tuple[int, int, int], val2: Tuple[int, int, int]) -> Tuple[int, int, int]:
+    def _compare_vals(val1: Tuple[int, int, int], val2: Tuple[int, int, int]) -> Tuple[int, int, int]:
         pass
 
 
@@ -159,11 +168,8 @@ class SemiCoopAgent(MaxAgent):
         super().__init__(initial_state, _id)
 
     @staticmethod
-    def _comparator(val1: Tuple[int, int, int], val2: Tuple[int, int, int]) -> Tuple[int, int, int]:
-        if val1 > val2:
-            return val1
-        else:
-            return val2
+    def _compare_vals(val1: Tuple[int, int, int], val2: Tuple[int, int, int]) -> bool:
+        return val1 > val2
 
 
 class FullyCoopAgent(MaxAgent):
@@ -171,11 +177,8 @@ class FullyCoopAgent(MaxAgent):
         super().__init__(initial_state, _id)
 
     @staticmethod
-    def _comparator(val1: Tuple[int, int, int], val2: Tuple[int, int, int]) -> Tuple[int, int, int]:
+    def _compare_vals(val1: Tuple[int, int, int], val2: Tuple[int, int, int]) -> bool:
         temp1 = (val1[0] + val1[1], val1[2])
         temp2 = (val2[0] + val2[1], val2[2])
 
-        if temp1 > temp2:
-            return val1
-        else:
-            return val2
+        return temp1 > temp2
