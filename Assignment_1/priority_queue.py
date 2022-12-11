@@ -1,6 +1,7 @@
 from typing import List, Union, Callable
 
 import state as s
+import vertex as v
 
 
 class PriorityQueue(object):
@@ -31,14 +32,15 @@ class PriorityQueue(object):
 
             if elem_value < min_value \
                     or (elem_value == min_value
-                        and elem_amount_to_save < min_element_amount_to_save) \
+                        and elem.state.current_vertex.form != v.Form.brittle
+                        and min_elem.state.current_vertex.form == v.Form.brittle) \
                     or (elem_value == min_value
-                        and elem_amount_to_save == min_element_amount_to_save
-                        and elem.state.does_current_vertex_need_saving()
-                        and not min_elem.state.does_current_vertex_need_saving()):
+                        and elem.state.current_vertex.form == min_elem.state.current_vertex.form
+                        and elem.state.current_vertex.id < min_elem.state.current_vertex.id):
                 min_elem = elem
                 min_value = elem_value
                 min_element_amount_to_save = elem_amount_to_save
 
         self.queue.remove(min_elem)
+        print(min_elem.state.current_vertex, min_value)
         return min_elem
