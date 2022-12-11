@@ -57,7 +57,7 @@ def savable_vertex_list_to_vertices_saved_dict(v_list: List[v.Vertex]):
     return v_dict
 
 
-def Breakable_vertex_list_to_vertices_broken_dict(v_list: List[v.Vertex]):
+def breakable_vertex_list_to_vertices_broken_dict(v_list: List[v.Vertex]):
     v_dict = dict()
     for vertex in v_list:
         v_dict[vertex] = False
@@ -66,7 +66,7 @@ def Breakable_vertex_list_to_vertices_broken_dict(v_list: List[v.Vertex]):
 
 def create_agent(game_type: int, world: g.Graph, starting_vertices: List[v.Vertex], _id: int, ply_limit: int):
     vertices_saved = savable_vertex_list_to_vertices_saved_dict(world.get_savable_vertices())
-    vertices_broken = Breakable_vertex_list_to_vertices_broken_dict(world.get_brittle_vertices())
+    vertices_broken = breakable_vertex_list_to_vertices_broken_dict(world.get_brittle_vertices())
     initial_state = s.State(starting_vertices, vertices_saved, vertices_broken, ply_limit)
 
     if game_type == 'ADVERSARIAL':
@@ -95,10 +95,10 @@ def simulator():
     agents_names.append('Agent 0')
     agents.append(create_agent(game_type, world, starting_vertices, 1, config['GAME_SPECS']['PLY_LIMIT']))
     agents_names.append('Agent 1')
-    print('agents: ')
+    print('\nAgents: ')
     for agent_name, starting_vertex in zip(agents_names, starting_vertices):
         print(agent_name + ' starting vertex index: ' + str(starting_vertex.id))
-    print('world: ')
+    print('\nWorld: ')
     print(world)
     print('game type: ' + game_type)
     input('Press Enter to start...')

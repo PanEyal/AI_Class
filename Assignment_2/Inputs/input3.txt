@@ -1,14 +1,15 @@
-#N 6        ; number of vertices n in graph (from 1 to n)
-#V1         ; Vertex 1, nothing of interest
-#V2 P1      ; Vertex 2, initially contains 1 person to be rescued, and is brittle
-#V3         ; Vertex 3, has no people and is brittle
-#V4         ; Vertex 4, initially contains 2 persons to be rescued
-#V5         ; Vertex 5, has no people and is not brittle
-#V6 P1      ; Vertex 6, has no people and is not brittle
+#N 6
 
-#E1 1 2 W1  ; Edge 1 from vertex 1 to vertex 2
-#E2 2 3 W1  ; Edge 2 from vertex 2 to vertex 3
-#E3 3 4 W1  ; Edge 3 from vertex 3 to vertex 4
-#E4 4 5 W1  ; Edge 4 from vertex 4 to vertex 5
-#E5 5 6 W1  ; Edge 5 from vertex 5 to vertex 6
-#E5 6 1 W1  ; Edge 5 from vertex 6 to vertex 1
+#V1
+#V2 P1
+#V3
+#V4
+#V5
+#V6 P1
+
+#E1 1 2 W1
+#E2 2 3 W1
+#E3 3 4 W1
+#E4 4 5 W1
+#E5 5 6 W1
+#E6 6 1 W1
