@@ -97,7 +97,7 @@ def simulator():
     agents_names.append('Agent 1')
     print('\nAgents: ')
     for agent_name, starting_vertex in zip(agents_names, starting_vertices):
-        print(agent_name + ' starting vertex index: ' + str(starting_vertex.id))
+        print(agent_name + ' starting vertex index: ' + str(starting_vertex.name))
     print('\nWorld: ')
     print(world)
     print('game type: ' + game_type)

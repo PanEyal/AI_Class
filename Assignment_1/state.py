@@ -14,9 +14,9 @@ class State:
     def __str__(self):
         s = "Current vertex: " + str(self.current_vertex) + "\n{"
         for vertex, saved in self.vertices_saved.items():
-            s += vertex.id + ": " + ("saved" if saved else "not saved") + "\n"
+            s += vertex.name + ": " + ("saved" if saved else "not saved") + "\n"
         for vertex, broken in self.vertices_broken.items():
-            s += vertex.id + ": " + ("broken" if broken else "intact") + "\n"
+            s += vertex.name + ": " + ("broken" if broken else "intact") + "\n"
         return s + "}"
 
     def save_current_vertex(self) -> None:

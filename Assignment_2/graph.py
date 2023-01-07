@@ -65,6 +65,6 @@ class Graph(object):
         res = res[:len(res) - 2]
         res += "\nedges: "
         for edge in self.generate_edges():
-            res += "(" + str(edge[0].id) + ", " + str(edge[1].id) + ", " + str(edge[2]) + "), "
+            res += "(" + str(edge[0].name) + ", " + str(edge[1].name) + ", " + str(edge[2]) + "), "
         res = res[:len(res) - 2]
         return res
