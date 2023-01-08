@@ -72,7 +72,7 @@ class BayesNetwork:
             bvi = self.get_node(f'BV{vertex_id}')
             evi = self.get_node(f'EV{vertex_id}')
             s += str(bvi) + '\n'
-            s += str(evi) + '\n'
+            s += str(evi)
 
         return s
 
@@ -101,10 +101,17 @@ def normalize(distribution: Dict[Tuple[str, ...], float]) -> Dict[Tuple[str, ...
     return distribution
 
 
+def get_query_values_given_evidence(x: Node, evidence: Set[Tuple[Node, str]]) -> List[str]:
+    for var, val in evidence:
+        if var == x:
+            return [val]
+    return x.get_values()
+
+
 def enumeration_ask(x_query: List[Node], e: Set[Tuple[Node, str]], bn: BayesNetwork) -> Dict[Tuple[str, ...], float]:
     distribution_x = {}  # Q(X)
-    values_options = [x.get_values() for x in x_query]
-    x_query_possible_assignments = list(itertools.product(*values_options))
+    possible_values = [get_query_values_given_evidence(x, e) for x in x_query]
+    x_query_possible_assignments = list(itertools.product(*possible_values))
     bn_variables = bn.get_nodes()
     for assignment in x_query_possible_assignments:
         extended_evidence = set.union(e, set(zip(x_query, assignment)))

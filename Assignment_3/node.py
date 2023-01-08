@@ -59,7 +59,6 @@ class Node:
         else:
             return self.get_prob(value, parents_evidence)
 
-
     def get_conds_combinations(self, my_value: str) -> Tuple[List[List[str]], List[List[str]]]:
         conditions = list(self.probs_table[my_value].keys())
         conditions.remove(Node.all_false)
