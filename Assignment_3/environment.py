@@ -1,8 +1,5 @@
-from typing import Dict, List
-
 import yaml
-
-from Assignment_3.node import Node
+from typing import Dict
 from bayes_network import BayesNetwork, enumeration_ask
 
 

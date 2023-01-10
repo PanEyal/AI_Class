@@ -135,4 +135,3 @@ def enumerate_all(_vars: List[Node], e: Set[Tuple[Node, str]]) -> float:
             prob_Y_given_parents = Y.get_prob_given_parents_evidence(y_val, Y_parents)
             prob += prob_Y_given_parents * enumerate_all(_vars[1:], set.union(e, {(Y, y_val)}))
         return prob
-
