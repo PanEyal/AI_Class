@@ -25,7 +25,7 @@ def transition(origin_state: State, dest_state: State) -> float:
     return round(origin_state.get_transition_prob(dest_state), 2)
 
 
-def get_initial_policy(states: List[State], graph: Graph, min_utility: int)\
+def get_initial_policy(states: List[State], graph: Graph, min_utility: int) \
         -> Dict[State, Union[Tuple[float, Tuple[Vertex, Vertex]], Tuple[float, None]]]:
     policy = {}
     for state in states:
@@ -36,7 +36,7 @@ def get_initial_policy(states: List[State], graph: Graph, min_utility: int)\
     return policy
 
 
-def value_iteration(states: List[State], graph: Graph, min_utility: int)\
+def value_iteration(states: List[State], graph: Graph, min_utility: int) \
         -> Dict[State, Union[Tuple[float, Tuple[Vertex, Vertex]], Tuple[float, None]]]:
     policies_prev = get_initial_policy(states, graph, min_utility)
     policies_next = get_initial_policy(states, graph, min_utility)
