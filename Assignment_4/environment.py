@@ -1,7 +1,6 @@
 import random
-from typing import Dict
-
 import yaml
+from typing import Dict
 
 import agent
 from graph import Graph

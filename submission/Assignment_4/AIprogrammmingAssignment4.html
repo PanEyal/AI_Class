@@ -1,0 +1,124 @@
+<HTML>
+<HEAD>
+    <TITLE>AI Programming Assignment 4</TITLE>
+    <LINK HREF="mailto:webmaster@cs.bgu.ac.il" REV="made">
+
+</HEAD>
+
+<BODY>
+<CENTER>
+    <H1>Introduction to Artificial Inteligence </H1>
+    <H3>Programming Assignment 4</H3>
+</CENTER>
+<HR>
+<CENTER>
+    <H2> Programming assignment - Decision-making under uncertainty </H2>
+    <H2>Hurricane Evacuation Problem</H2>
+</CENTER>
+<p>
+
+<H3>Goals </H3>
+<P>
+    Sequential decision making under uncertainty using
+    belief-state MDP for decision-making: the Hurrucane Evacuation problem.
+    (This is an obscure variant of the Canadian traveler problem.)
+
+<H3>Hurricane Evacuation Decision Problem - Domain Description</H3>
+
+<P>
+    The domain description is similar to that described in assignment 1,
+    except that again we do not know the locations of the blocakges.
+    For simplicity, however, we will assume that the blockages occur independently, (i.e. that all brittle vertices have
+    already been broken, but we don't know for certain if they were brittle) with a known
+    given probability. They are revealed with certainty when the agent reaches
+    a neigbouring vertex.
+
+<P>
+    Thus, in the current problem to be solved, we are given a weighted
+    undirected graph, where each vertex has a known probability of being blocked.
+    These distributions are jointly independent.
+    The agent's only actions are traveling between vertices.
+    Traversal times are the weight of the edge.
+    Also for simplicity, we will assume only one agent, starting at s, and only target vertex t
+    with people to be saved.
+    The problem is to find a policy that saves the people in as short a time as possible (in expectation).
+
+<P>
+    The graph can be provided in a manner similar to previous assignments, for example:
+
+
+<pre>
+#V 5    ; number of vertices n in graph (from 1 to n)
+
+#E1 1 2 W3   ; Edge from vertex 1 to vertex 2, weight 3
+#E2 2 3 W2   ; Edge from vertex 2 to vertex 3, weight 2
+#E3 3 4 W3   ; Edge from vertex 3 to vertex 4, weight 3, probability of blockage 0.3
+#E4 4 5 W1   ; Edge from vertex 4 to vertex 5, weight 1
+#E5 2 4 W4   ; Edge from vertex 2 to vertex 4, weight 4
+
+#B 2 0.3     ; Blocakge at vertex 2 with probability 0.3
+#B 3 0.8     ; Blockage at vertex 3 with probability 0.8
+
+#Start 1
+#Target 5
+</pre>
+
+<P>
+    The start and goal (target) vertices, should be determined via some
+    form of user input (as in the file, or querying the user). For example,
+    in the above graph the start vertex is 1, and the goal (target) vertex is 5.
+    You should assume that the start and target vertices are never blocked, and that there
+    is in addition an edge between them that has a very high cost (say 10000).
+
+<H3>Solution method</H3>
+
+<P>
+    The Canadian traveller problem is known to be PSPACE-complete (and it is likely that the
+    uncertain Hurricane Evacuation problem is also PSPACE-complete) so you will
+    be required to solve only very small instances. We will require that the
+    entire belief space be stored in memory explicitly, and thus impose a limit
+    of at most 20 vertices with at most 10 possible blockages.
+    Your program should initialize
+    belief space value functions and use a form of value iteration
+    (discussed in class) to compute the value function for
+    the belief states. Maintain the
+    optimal action during the value iteration for each belief state,
+    so that you have the optimal policy at convergence.
+
+
+<H3>Requirements </H3>
+
+<P>
+    Your program should read the data, including the parameters
+    (start and shelter vertices). You should construct the policy, and
+    present it in some way. Provide at least the following types of output:
+
+<OL>
+    <LI> A full printout of the value of each belief-state, and the
+        optimal action in that belief state, if it exists.
+        (Print something that indicates so if this state is irregular,
+        e.g. if it is unreachable).
+    <LI> Run a sequence of simulations. That is, generate a graph instance
+        (blockage locations) according to the distributions, and run the
+        agent through this graph based on the (optimal) policy computed
+        by your algorithm. Display the graph instance and sequence of actions.
+        Allow the user to run additional simulations, for a newly generated
+        instance in each case.
+</OL>
+
+
+<H3>Deliverables </H3>
+
+<OL>
+    <LI> Source code and executable files of programs.
+    <LI> Explanation of the method employed in your algorithm.
+    <LI> Non-trivial example runs on at least 2 scenarios,
+        including the input and output.
+    <LI> Submit makefile and short description on how to run your program.
+</OL>
+
+<P>
+
+    Official deadline: January 20, 2023
+</BODY>
+</HTML>

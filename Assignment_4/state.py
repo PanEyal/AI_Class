@@ -98,20 +98,3 @@ def filter_bad_states(states: List[State]) -> List[State]:
             filtered_states.append(state)
     return filtered_states
 
-
-def get_starting_state(states: List[State], starting_vertex_id: int) -> State:
-    for state in states:
-        if state.current_vertex.id != starting_vertex_id:
-            continue
-        for vertex, status in state.brittle_vertices_status.items():
-            if status is not Status.UNKNOWN:
-                continue
-        return state
-
-    raise Exception('starting state not found')
-
-# def get_state_from_states(states:list, required_current_vertex, required_edges_status):
-# 	for state in states:
-# 		if state.current_vertex == required_current_vertex and state.edges_status == required_edges_status:
-# 			return state
-# 	exit(2)

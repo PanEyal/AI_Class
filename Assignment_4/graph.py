@@ -37,16 +37,6 @@ class Graph(object):
     def get_target_vertex_id(self) -> int:
         return self.t
 
-    # def get_adjacent_blockable_edges(self,vertex):
-    #     blockable_edges = []
-    #     for neighbor_tup in self.expand(vertex):
-    #         if neighbor_tup[2].blocked_in_prob > 0:
-    #             blockable_edges.append(neighbor_tup[2])
-    #     return blockable_edges
-
-    # def get_edges(self):
-    #     return self.generate_edges()
-
     def get_brittle_vertices(self) -> List[Vertex]:
         vertices = self.get_vertices()
         return [vertex for vertex in vertices if vertex.is_brittle()]
@@ -58,43 +48,8 @@ class Graph(object):
                 vertex_to_ret = vertex
         return vertex_to_ret
 
-    # def vertices_ids(self) -> List[int]:
-    #     id_list = []
-    #     for vertex in self.get_vertices():
-    #         id_list.append(vertex.id)
-    #     return id_list
-
-    # def expand(self, vertex: v.Vertex) -> List[Tuple[v.Vertex, int]]:
-    #     return self.vertices_dict[vertex]
-
-    # def expand_just_vertices(self, vertex: v.Vertex) -> map:
-    #     return map(lambda neighbor_tup: neighbor_tup[0], self.expand(vertex))
-
-    # def expand_just_edges(self, vertex):
-    #     return list(map(lambda neighbor_tup: neighbor_tup[2], self.expand(vertex)))
-
-    # def get_edge_weight(self, vertex1: v.Vertex, vertex2: v.Vertex) -> int:
-    #     neighbors = self.expand(vertex1)
-    #     for neighbor in neighbors:
-    #         if neighbor[0].id == vertex2.id:
-    #             return neighbor[1]
-
     def vertex_exists(self, vertex: Vertex) -> bool:
         return vertex.id in self.vertices_dict.keys()
-
-    # def edge_exists(self, vertex1: v.Vertex, vertex2: v.Vertex) -> bool:
-    #     neighbor_list = self.expand(vertex1)
-    #     for neighbor_tup in neighbor_list:
-    #         if vertex2 == neighbor_tup[0]:
-    #             return True
-    #     return False
-
-    # def get_edge(self, vertex1: v.Vertex, vertex2: v.Vertex) -> Edge:
-    #     neighbor_list = self.expand(vertex1)
-    #     for neighbor_tup in neighbor_list:
-    #         if vertex2 == neighbor_tup[0]:
-    #             return neighbor_tup[2]
-    #     return None
 
     def add_vertex(self, vertex: Vertex) -> None:
         if not self.vertex_exists(vertex):
@@ -113,12 +68,6 @@ class Graph(object):
             for neighbor, weight in vertex.get_edges().items():
                 edges.add((vertex.id, neighbor.id, weight))
         return edges
-
-    # def copy_graph(self) -> 'Graph':
-    #     new_graph = Graph()
-    #     for vertex in self.get_vertices():
-    #         new_graph.vertices_dict[vertex] = list(self.expand(vertex))
-    #     return new_graph
 
     def __str__(self):
         res = "vertices: "
