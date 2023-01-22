@@ -53,10 +53,10 @@ if __name__ == '__main__':
         config = yaml.safe_load(f)
     parsed_file = parse_file(config['INPUT_PATH'])
 
-    graph = Graph(parsed_file, -(config['MIN_UTILITY'] + 1))
+    graph = Graph(parsed_file, config['MAX_WEIGHT'])
     print('The vertices:', graph.get_vertices())
     states = generate_states(graph)
-    policies = value_iteration(states, graph, config['MIN_UTILITY'])
+    policies = value_iteration(states, graph, -(config['MAX_WEIGHT'] + 1))
     print_policies(policies)
     print(f'\n\n\n----------------------SIMULATION----------------------\n')
     while True:
@@ -71,5 +71,5 @@ if __name__ == '__main__':
         print('Running...')
 
         agent.find_target(graph, brittle_vertices_status, policies, states, graph.get_start_vertex_id())
-        if input('Do you want to run another simulation? (y/n) ') != 'y':
+        if input('Do you want to run another simulation? (y/<anything else>) ') != 'y':
             break
