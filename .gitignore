@@ -1,5 +1,7 @@
 Reference/*
-.idea/*
+*\.idea
+*/.idea
+*.pyc
 
 # Ass1
 Assignment_1/__pycache__/*

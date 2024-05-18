@@ -1,0 +1,170 @@
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title>AI Theoretical Assignement 1</title>
+
+
+</head>
+
+<body>
+        <center>
+        <h1>Introduction to Artificial Inteligence </h1>
+        <h3>Theoretical Assignment 1</h3>
+        </center>
+<hr>
+<h2>Homework assignment - simulators, agents, search, games,  logic, inference  </h2>
+
+
+<pre>
+
+1)  (agents and environment simulators - 5%):
+   For each of the following domains, which type of agent is appropriate
+   (table lookup, reflex, goal based, or utility based). Also, indicate the
+   type of environment:
+   a) An agent that plays Poker.
+   b) A fully autonomous robot for home repair.
+   c) An internet agent that optimizes Covid-19 response at the municipal level.
+   d) An agent that solve CryptArithmetic puzzles.
+   e) An agent that can solve Sokoban puzzles (with bonus for shorter plans).
+
+2) (Search - 20%):
+   Show the run of the following algorithms on the setting of question 6
+   below, where the agent starting at V0 needs to save everybody as quicky as possible,
+   where costs (times) are as defined in assignment 1: edge weight. 
+   Assume that h(n) is the heuristic defined in class based on the minimun spanning tree.
+
+   a) Greedy search (f(n) = h(n)), breaking ties in favor of states with fewer
+      broken vertices, and then in favor of agenet being in a lower
+      numbered vertex.
+   b) A* search, (f(n) = g(n)+h(n)), breaking ties as above.
+   c) Simplified RTA* with a limit of 2 expansions per real action, breaking ties as above.
+   d) Repeat a-c but using h'(n) = 2*h(n) as the heuristic. Is h'(n) admissible?
+
+3) (Game trees 10%):
+   Consider a 3-person game (A, B, C) with complete information deterministic environment.
+   Suppose A has 5 possible moves. Provide a game tree example that shows that for
+   each of the following set of "loyalties", A will have a different optimal move:
+   a) Each agent out for itself, and they cannot communicate (with ties broken adversarially).
+   b) As in a, except B and C are semi-cooperative (they break ties cooperatively)
+   d) As in a, except B and C are partners aiming to maximize the sum of their scores
+   d) Paranoid assumption: B and C are against A, no matter what their score is.
+   e) As in a, except C plays randomly with uniform distribution.
+   
+   Explain your answer by showing the computed values in the internal nodes in each case.
+   Note that you should probably make the example more concise by allowing
+   only ONE choice of action for some of the players in some parts of the tree!
+   
+4)  (Game-tree search - alpha-beta pruning - 15%)
+   In the adversarial version of the hurricane evacuation problem:
+   a) Construct an example where the optimal first move is no-op (assuming such an action is allowed),
+      or argue that this cannot be the case.
+   b) Construct and show an example (including the static heuristic evaluation function and
+      search tree), with a tree depth of at least 4 ply.
+   c) Show where alpha-beta pruning can decrease search effort in the tree from b.
+
+
+5) (Propositional logic - 10%)
+   For each of the following sentences, determine whether they are
+   satisfiable, unsatisfiable, and/or valid. For each sentence
+   determine the number of models (over the propositional
+   variables in the sentence). 
+   Note: some items seem hard, but if you use some (natural) intelligence, easier than it may seem.
+   a) (not A and not B and not C and not D and not E) or (A and B and C and D)
+   b) (A or B or C or D or E or F) and (not A or not B or not C or not D or not E or not F)
+   c) (A or B and (D or not A) and (E or A) -&gt; (B or C and (not D or E))) and (A and not A)
+   d) (A and (A -&gt; B) and (B -&gt; C) and (C -&gt; D)) -&gt;  D
+   e) not ((A and (A -&gt; B) and (B -&gt; C)) -&gt; C)
+   f) (A -&gt; not A) or (not B -&gt; B)
+ 
+   Bonus question: in cases a, b, c, also trace the run of the DPLL algorithm 
+   for satisfiability with this formula as input (i.e. explain any recursive calls and 
+   cases encountered).
+
+6) (FOL and situation calculus - 40%) 
+   We need to represent and reason within the scenario defined by assignment 1.
+   For simplicity, we will assume only one agent, and that an action is a single edge traversal.
+   
+   
+   a) Write down the axioms for the behavior of the world using FOL and
+      situation calculus.
+
+      Use the predicates:
+        Vertex(v)       ; v is a vertex
+        Edge(e, v1, v2) ; e is an edge in the graph between v1 and v2
+        Weight(e,w)     ; Weight of edge e is w
+		B(v)            ; Vertex v is brittle (can be traversed only once)
+    Also use the fluents (situation-dependent predicates)
+        Loc(v,s)        ; Agent is at vertex v in situation s
+		PeopleAt(v,s)   ; There are people to save at vertex v that have not yet been saved in situation s
+        Time(t,s)       ; The time since creation is t in situation s
+		U(v,s)          ; Vertex v is unbroken in situation s
+
+     Constants: as needed, for the edges and vertices, and simple actions (terminate).
+
+     Functions: 
+         traverse(e)     ; Denotes a traverse action across edge e
+     and of course the "Result" function:
+         Result(a,s)    ; Denotes the situation resulting from doing action a in
+                        ; situation s.
+     You may wish to add auxiliary predicates or fluents in order to simplify the axioms.
+     You are allowed to do so provided you explain why they are needed.
+
+
+   Let the facts representing the scenario be:
+<pre>Edge(E1, V0, V1)
+Edge(E2, V0, V3)
+Edge(E3, V1, V2)
+Edge(E4, V2, V3)
+Edge(E5, V2, V4)
+Weight(E1,1)
+Weight(E2,10)
+Weight(E3,1)
+Weight(E4,1)
+Weight(E5,1)
+B(V1)
+B(V2)
+
+; with situation S0 fluents being (note that this is a partial, "closed world assumption" description).
+Loc(V0, S0)
+U(V1, S0)
+U(V2, S0)
+PeopleAt(V3, S0)
+PeopleAt(V4, S0)
+Time(0, S0)
+</pre>
+
+  b)  Now, we need to find a sequence of actions that will result in all people
+      being saved, starting from S0 (which you found in question 1 above), 
+      and <b>prove</b> a theorem there are no people to be saved
+      (but do not need to prove optimality). Do this by the following steps:
+
+      A) Convert the knowledge base into conjunctive normal form. (This is very long, 
+         so you may omit the parts not needed in the proof below).
+      B) Formally list what we need to prove (a theorem), and state its negation.
+      C) Use resolution to reach a contradiction, thus proving the theorem.
+         At each step of the proof, specify the resolvents and the unifier.
+         For simplicity, you <b>may (recommended!) omit the time keeping </b> 
+		 from the KB before doing the proof. (Say exactly which axioms you are
+         changing in order to do that, if you decide to simplify).
+
+  c) Would there be a potential problem in the proof if we did not
+     have "frame axioms" in our representation (i.e. stating what
+     did <b>not</b> change), and if so, what?
+
+  d) Would we be able to do the proof using only forward chaining?
+
+Justify all answers shortly!
+</pre>
+      
+
+<p>
+Deadline: (15:00), Tuesday, December 13, 2022 (<b> strict</b> deadline).
+
+</p><p>
+Submissions are to be <b>solo</b>.
+
+
+
+
+
+
+</p></body></html>

@@ -1,0 +1,202 @@
+<HTML>
+<HEAD>
+<TITLE>AI Theoretical Assignment 2</TITLE>
+<LINK REV="made" HREF="mailto:webmaster@cs.bgu.ac.il">
+
+</HEAD>
+
+<BODY>
+	<CENTER>
+	<H1>Introduction to Artificial Inteligence </H1>
+	<H3>Theoretical Assignment 2</H3>
+	</CENTER>
+<HR>
+	<H2> Written assignment: planning, probabilistic inference, and learning  </H2>
+<p>
+
+<PRE>
+Justify all answers!
+
+1)  For the blocks world as defined in class, show how POP constructs the plan
+   (that is, show all partial plans from the initial plan until a correct
+    plan is reached) for initial state:
+
+       
+       D
+       A
+    C  B
+------------
+
+      and the goal state containing: On(A,B) and On(B,C)
+
+2) We are given the following independence statements about random variables
+   A, B, C, D, E, F:
+
+      I({A,B,C},{D,F}|{})
+	  I({E},{D,F}|{})
+	  I({A,B,C},{E}|{})
+      I({A},{C}|{B})
+      
+      not I({A},{B}|{})
+      not I({B},{C}|{})
+      not I({D},{F}|{})
+
+a) Construct a Bayes network that is consistent with the 
+   above set of independence statements.
+
+b) Is the answer above unique? If not, what is the set of possible BNs 
+   that is consistent with all the statements?
+
+3) Consider the following variables and their immediate causes (parents):
+
+     variable         parents
+-------------------------------
+        A               none
+        B               none
+        C               A
+        D               A
+        E               B
+        G               C D B
+        H               E
+        I               A B H
+
+    a) Is this network a poly-tree?
+    b) Is this network (directed-path) singly connected?
+    c) Determine the truth of the following independence
+       statements (using d-separation):
+       1)  I({D}, {E} | {})
+       2)  I({D}, {E} | {A})
+       3)  I({D}, {E} | {A, H})
+       4)  I({B}, {E} | {D})
+       5)  I({B}, {C} | {})
+       6)  I({B}, {C} | {G})
+    d) Assume that the nodes are binary-valued.
+       Suppose that P(A=true) = 0.2, P(B=true)= 0.3
+       P(H=true|E=true) = 0.2, P(H=true|E=false) = 0.4,
+       P(G=true|B=C=D=true) = 0.9, P(G=true| B,C,D anything else) = 0.3, 
+       P(C=true|A=true) = 0.9, P(C=true|A=false) = 0.2
+       P(E=true|B=true) = 0.8, P(E=true|B=false) = 0.1
+
+       Find P(E=true | B=true, G=true)
+
+       Hint: you may want to preprocess to get rid of nodes before doing any computation.
+
+
+4)  Consider the following business opportunities scenario, occuring in a certain middle-eastern country.*
+    We will assume that you are a risk-neutral, i.e. that
+    your utility function is linear in the amount of money that your assets are worth.
+    Assume also that moral considerations are not part of your utility function.
+
+    You have just bought rights for construction in the SacredTurf project, and stand to 
+    gain 1000 MEMU (Million eastern monetary units) for it. However, you wish to improve your gains, by
+    requesting that you be allowed to build 3 times as many floors as originally approved, thereby
+    increasing your gains to 2500 MEMU. You need to pay 200 MEMU for the request, and because
+    this is against zoning laws the probability that it will be approved is 0.02, and your
+    200 MEMU for the request is lost whether or not the request is granted.
+
+    You have the option of approaching a facilitator ("MA'KHER" in language of said country),
+    who, for the paltry sum of 400 MEMU will make sure that Mayor Somegraft (mayor of city where SacredTurf resides), and the government
+    officials in charge will "see reason" (and also cash, but you don't want to know), 
+    thereby increasing the probability that the petition is granted to 1.
+
+    However, you also know that such use of a facilitator may be illegal, and that  there is a probability of 0.8
+    that 10 years from now charges will be brought, and if so, probability of 0.5 that you will be convicted,
+    go to jail and also made to pay a fine.
+    Suppose also that you estimate the total loss in such a case (fine, plus jail time in monetary value) is
+    10000 MEMU.
+
+    a) What is your rational choice from:
+        A) Not filing a request, B) Filing a request with no facilitator, C) Filing a request with facilitator,
+       for the following utility combination functions:
+       1) Undiscounted rewards.
+       2) Discounted rewards with a discounting factor of 0.2 per 10 years (i.e you really do not
+          care very much about 10 years from now).
+
+    b) As above, but you have the choice to pay 100 MEMU for legal advice 
+       on whether charges against you will stick. For simplicity, we will assume that this legal advice
+       is perfectly correct. What is the rational policy in this case?
+
+
+5) Consider the following Hurricane Evacuation problem under uncertainty problem instance, where
+   you need to go from I to G as quickly as possible (that is, least expected total weight of traversed edges).
+
+   The (undirected) graph has 4 vertices, as follows:
+     (I, V1, V2, V3, V4, V5, G)
+   The edges are as follows:
+     (I, V1), weight  1.
+     (I, V4), weight  40.
+     (V1, V2), weight 10.
+     (V1, G), weight  1000.
+	 (V2, V3), weight 10.
+     (V3, V4), weight 10.
+	 (V4, V5), weight 1.
+     (V5, G), weight  50.
+
+
+   I is the start vertex, and G is a goal vertex.
+   V2, V3, V5 may each be blocked with probability 0.5. Their true state becomes known when visiting
+   an adjacent vertex.
+   I, V1, V4, G are never blocked.
+ 
+   b1) Formalize the above problem as a (belief-state) MDP, i.e. 
+       what are the states, the transition probability
+       function, and the reward function? (The the cost of traversing an edge is equal to it weight).
+
+   b2) Find the optimal policy. You may assume that you only need to compute the optimal
+       policy for the given start vertex I in order to save some computation.
+
+   b3)In addition, from node I only, and before it starts moving,
+      the agent can perform a SENSING action
+      for a cost of 1, which results in the agent knowing with certainty whether V2 is blocked.
+	  Re-compute the optimal policy for this case.
+
+6)  A principal researcher in the NSF-BSF project on situated temporal planning
+    would like to construct a decision procedure based on results from hiring
+    employees in the DARPA Robotics Challenge project.
+    The decision procedure will be based on a decision tree, using information
+    in the case database. Attributes for each employee are:
+    degree level (A),  Python programming ability (B) Self motivation (C), number of
+    papers published in AI workshops (D).
+    The target attribute is the "decision", whether to hire or not.
+
+  a) Construct by hand (using the greedy search using the best information
+     gain heuristic) a consistent decision tree for the following table:
+
+     input variables               decision
+   A      B      C      D
+--------------------------------------------
+   2      F      L      0             N
+   2      F      H      1             Y
+   2      T      L      0             N
+   3      F      H      0             N
+   3      T      H      2             Y
+   3      T      L      0             Y
+   3      T      H      1             Y
+
+  b) Is a more compact (fewer internal nodes) decision tree possible for the above table?
+     If no - prove it. If yes, which tree?
+	 
+7) You need to construct a 3-input neural network that has 2 outputs: one is 1 if the number
+   of inputs with value 1 is odd, and the other is 1 if there are at least 2 inputs with value 1.
+   (e.g. if all 3 inputs are 1, then the first ouput should be 0, and the second should be 1).
+   a) Can this be done without hidden units?
+   b) Show a network using threshold elements that performs
+      the required computation (specify the weights, too!)
+
+
+
+</PRE>
+<P>
+Deadline (strict): Thursday, January 19, 2023, at 10 AM.
+<P>
+Note: submission (as well as WORK) on this exercise is SOLO (that is, NOT
+in pairs or other groups of size > 1)
+
+<P>
+* Disclaimer: any seeming identification with existing countries,
+institutions, political parties, or people, is unintentional (yeah, sure it ain't).
+
+
+</BODY>
+<HTML>
+
